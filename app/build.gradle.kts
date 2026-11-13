@@ -137,12 +137,6 @@ android {
         buildConfig = true
     }
 
-    androidResources {
-        // Generates the per-app language config (Android 13+ language picker) from res/values-*.
-        @Suppress("UnstableApiUsage")
-        generateLocaleConfig = true
-    }
-
     packaging {
         // Keep native libs uncompressed & page-aligned → 16 KB page-size compatible.
         jniLibs { useLegacyPackaging = false }
@@ -154,12 +148,6 @@ android {
                 "DebugProbesKt.bin",
             )
         }
-    }
-
-    bundle {
-        language { enableSplit = false } // in-app language switch needs all locales installed
-        density { enableSplit = true }
-        abi { enableSplit = true }
     }
 
     lint {
@@ -183,10 +171,9 @@ kotlin {
         freeCompilerArgs.addAll(
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-            "-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi",
-            "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
             "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
             "-opt-in=kotlinx.coroutines.FlowPreview",
+            "-Xannotation-default-target=param-property",
         )
     }
 }
@@ -202,11 +189,11 @@ ksp {
 dependencies {
     // AndroidX core
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.fragment.ktx)
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -222,10 +209,8 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material3.window.size)
     implementation(libs.androidx.compose.material.icons.extended)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -249,14 +234,12 @@ dependencies {
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.common)
     implementation(libs.androidx.media3.transformer)
-    implementation(libs.androidx.media3.effect)
     implementation(libs.coil.compose)
     implementation(libs.coil.video)
     implementation(libs.coil.gif)
 
     // Widget
     implementation(libs.androidx.glance.appwidget)
-    implementation(libs.androidx.glance.material3)
 
     // KotlinX
     implementation(libs.kotlinx.coroutines.android)
@@ -269,22 +252,9 @@ dependencies {
     implementation(libs.play.review.ktx)
     implementation(libs.play.app.update.ktx)
 
-    // Unit tests
+    // Unit tests (pure JVM)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.truth)
-    testImplementation(libs.turbine)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.test.core)
-    testImplementation(libs.androidx.room.testing)
-    testImplementation(libs.androidx.work.testing)
-
-    // Instrumented tests
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.hilt.android.testing)
-    kspAndroidTest(libs.hilt.compiler)
 }

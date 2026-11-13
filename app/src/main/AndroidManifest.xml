@@ -20,12 +20,15 @@
     <!-- Make sure no library silently adds broad storage access (Play policy). -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage"
         tools:node="remove" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage"
         tools:node="remove" />
     <uses-permission
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage"
         tools:node="remove" />
 
     <uses-feature
@@ -109,16 +112,6 @@
                 android:value="androidx.startup"
                 tools:node="remove" />
         </provider>
-
-        <!-- Per-app language persistence on Android 10–12 (AppCompat backport). -->
-        <service
-            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
-            android:enabled="false"
-            android:exported="false">
-            <meta-data
-                android:name="autoStoreLocales"
-                android:value="true" />
-        </service>
 
         <!-- Home-screen widget: new status count. -->
         <receiver

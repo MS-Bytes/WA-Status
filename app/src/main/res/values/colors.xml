@@ -4,9 +4,7 @@
      launcher icon, splash screen, notifications and widget. -->
 <resources>
     <color name="brand_primary">#5B4CF0</color>
-    <color name="brand_primary_dark">#3F2FC7</color>
     <color name="brand_secondary">#FF6B6B</color>
-    <color name="brand_tertiary">#00B8D9</color>
 
     <color name="icon_gradient_start">#7B61FF</color>
     <color name="icon_gradient_end">#3F2FC7</color>
@@ -17,5 +15,4 @@
     <color name="notification_accent">#5B4CF0</color>
 
     <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
 </resources>

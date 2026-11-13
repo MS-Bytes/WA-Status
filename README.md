@@ -4,7 +4,7 @@
 
 **View, save, edit, share and repost photo & video statuses — offline, on-device, no login.**
 
-Works with WhatsApp & WhatsApp Business · Android 10 – 16 · Kotlin · Jetpack Compose · Material 3
+Works with WhatsApp & WhatsApp Business · Android 10 – 16 · Kotlin · Jetpack Compose · Material 3 · English
 
 </div>
 
@@ -29,7 +29,6 @@ Works with WhatsApp & WhatsApp Business · Android 10 – 16 · Kotlin · Jetpac
 | 💬 **Direct chat** | Message any number without saving the contact (country code picker + optional message). |
 | 🔒 **App Lock** | PIN or BiometricPrompt. |
 | 🎨 **Theming** | Light / Dark / System, Material You dynamic color on Android 12+. |
-| 🌐 **Languages** | English and Urdu (full RTL support), per-app language on Android 13+. |
 | 🧩 **Widget** | Glance home-screen widget showing the new-status count. |
 
 ### Privacy by design
@@ -51,7 +50,7 @@ Works with WhatsApp & WhatsApp Business · Android 10 – 16 · Kotlin · Jetpac
 ## 🧱 Tech stack
 
 - **Language:** Kotlin 2.2 (K2), Coroutines + Flow / StateFlow
-- **UI:** Jetpack Compose, Material 3, Navigation Compose (type-safe routes), WindowSizeClass, SplashScreen API, edge-to-edge, predictive back
+- **UI:** Jetpack Compose, Material 3, Navigation Compose (type-safe routes), adaptive grid, SplashScreen API, edge-to-edge, predictive back
 - **Architecture:** MVVM + Clean Architecture (`data` / `domain` / `ui`), single activity, Hilt DI
 - **Media:** Coil 3 (+ video frame & GIF decoders), Media3 ExoPlayer, Media3 Transformer
 - **Storage:** SAF + `DocumentsContract` queries, MediaStore (`IS_PENDING`), Room, DataStore Preferences
@@ -67,45 +66,34 @@ Works with WhatsApp & WhatsApp Business · Android 10 – 16 · Kotlin · Jetpac
 ```
 WA-Status/
 ├── app/
-│   ├── build.gradle.kts            # app module, ad IDs & signing from local.properties
+│   ├── build.gradle.kts            # ad IDs & signing read from local.properties / env
 │   ├── proguard-rules.pro
-│   ├── schemas/                    # exported Room schemas (generated)
+│   ├── schemas/                    # exported Room schema
 │   └── src/
-│       ├── main/
-│       │   ├── AndroidManifest.xml
-│       │   ├── java/com/msbytes/statussaver/
-│       │   │   ├── StatusSaverApp.kt          # @HiltAndroidApp, WorkManager config
-│       │   │   ├── MainActivity.kt            # single activity, splash, edge-to-edge
-│       │   │   ├── core/                      # dispatchers, result types, utils, extensions
-│       │   │   ├── di/                        # Hilt modules
-│       │   │   ├── data/
-│       │   │   │   ├── saf/                   # SAF folder access + DocumentsContract scanner
-│       │   │   │   ├── media/                 # MediaStore saver / saved-media source
-│       │   │   │   ├── local/db/              # Room (favorites, seen/auto-saved records)
-│       │   │   │   ├── local/prefs/           # DataStore settings & security
-│       │   │   │   └── repository/            # repository implementations
-│       │   │   ├── domain/
-│       │   │   │   ├── model/                 # StatusItem, StatusSource, MediaType, …
-│       │   │   │   ├── repository/            # repository interfaces
-│       │   │   │   └── usecase/               # Save, Share, Delete, Observe, AutoSave…
-│       │   │   ├── ui/
-│       │   │   │   ├── theme/                 # Material 3 theme, colors, typography
-│       │   │   │   ├── navigation/            # NavHost + type-safe routes
-│       │   │   │   ├── components/            # grid tile, shimmer, empty/error states…
-│       │   │   │   ├── onboarding/  permission/  home/  viewer/  saved/
-│       │   │   │   ├── editor/  settings/  about/  faq/  directchat/  applock/
-│       │   │   ├── ads/                       # AdManager, ConsentManager, ad composables
-│       │   │   ├── work/                      # status check & auto-save workers
-│       │   │   ├── notifications/             # channels & builders
-│       │   │   └── widget/                    # Glance widget + receiver
-│       │   └── res/                           # values (EN), values-ur (UR), night, xml, icons
-│       ├── test/                              # unit tests (JVM / Robolectric)
-│       └── androidTest/                       # instrumented tests
-├── docs/                           # GitHub Pages: privacy-policy.html, app-ads.txt guide
+│       ├── main/java/com/msbytes/statussaver/
+│       │   ├── StatusSaverApp.kt · MainActivity.kt · MainViewModel.kt
+│       │   ├── core/                 # UiState, UiEvent, formatters, intents, media metadata cache
+│       │   ├── domain/model/         # StatusItem, StatusSource, SaveResult, settings …
+│       │   ├── domain/repository/    # repository interfaces
+│       │   ├── data/saf/             # SAF folder access + DocumentsContract scanner
+│       │   ├── data/media/           # MediaStore saver (IS_PENDING, duplicate check)
+│       │   ├── data/share/           # share / repost intents
+│       │   ├── data/local/           # Room (favorites) + DataStore (settings, PIN)
+│       │   ├── data/repository/      # repository implementations
+│       │   ├── di/                   # Hilt modules
+│       │   ├── ads/                  # AdManager, ConsentManager (UMP), frequency policy, banner, native
+│       │   ├── work/                 # 15-min status check (auto-save + notifications)
+│       │   ├── notifications/ · widget/ · security/ · play/
+│       │   └── ui/                   # theme, navigation, components, home, saved, viewer,
+│       │                             # editor, settings, about, faq, directchat, applock, onboarding
+│       ├── main/res/                 # strings, themes, adaptive icon, native ad layout, xml configs
+│       └── test/                     # JVM unit tests (repository, saver, ad caps, validator)
+├── docs/
+│   ├── privacy-policy.html         # GitHub Pages
+│   └── PLAY_STORE.md               # listing, Data safety, content rating, test checklist
 ├── gradle/libs.versions.toml       # version catalog
-├── .github/workflows/android.yml   # CI: build, lint, unit tests, APK artifact
-├── local.properties.example
-├── CHANGELOG.md · LICENSE · README.md
+├── .github/workflows/android.yml   # CI: lint, unit tests, debug APK, release AAB
+└── local.properties.example · CHANGELOG.md · LICENSE · README.md
 ```
 
 ---
@@ -174,6 +162,13 @@ Replace `pub-XXXXXXXXXXXXXXXX` with your AdMob publisher ID. Then press **“Che
 3. `./gradlew bundleRelease` → upload the `.aab` to Play Console with **Play App Signing** enabled.
 
 Without these keys the release bundle is built unsigned (useful for CI).
+
+---
+
+## 🚀 Publishing
+
+See **[docs/PLAY_STORE.md](docs/PLAY_STORE.md)** for the store listing text, Data safety answers,
+content-rating guidance, AdMob checklist and the device test checklist.
 
 ---
 

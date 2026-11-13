@@ -1,0 +1,158 @@
+package com.msbytes.statussaver.data.media
+
+import android.content.ContentUris
+import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.os.StatFs
+import android.provider.MediaStore
+import com.msbytes.statussaver.data.saf.StatusFolderValidator
+import com.msbytes.statussaver.domain.model.DeleteOutcome
+import com.msbytes.statussaver.domain.model.MediaType
+import com.msbytes.statussaver.domain.model.SaveResult
+import com.msbytes.statussaver.domain.model.StatusItem
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.FileNotFoundException
+import java.io.InputStream
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * Writes files into the shared Pictures/Movies collections through MediaStore.
+ * No storage permission is needed for files the app creates itself.
+ * All functions are blocking — call them from Dispatchers.IO.
+ */
+@Singleton
+class MediaStoreSaver @Inject constructor(
+    @ApplicationContext private val context: Context,
+) {
+    private val resolver get() = context.contentResolver
+
+    /** Copies [item] byte-for-byte (original quality). */
+    fun save(item: StatusItem): SaveResult {
+        findExisting(item.name, item.size, item.type)?.let { return SaveResult.AlreadySaved(it) }
+        return write(item.name, item.type, item.size) { resolver.openInputStream(item.uri) }
+    }
+
+    /** Saves an exported/edited file as a new media item. */
+    fun saveStream(displayName: String, type: MediaType, size: Long, open: () -> InputStream?): SaveResult =
+        write(displayName, type, size, open)
+
+    fun querySaved(): List<StatusItem> =
+        MediaType.entries.flatMap { type -> queryCollection(type) }
+
+    fun delete(uris: List<Uri>): DeleteOutcome {
+        var deleted = 0
+        val notOwned = mutableListOf<Uri>()
+        uris.forEach { uri ->
+            try {
+                if (resolver.delete(uri, null, null) > 0) deleted++ else notOwned += uri
+            } catch (_: SecurityException) {
+                notOwned += uri
+            }
+        }
+        val request = if (notOwned.isNotEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            MediaStore.createDeleteRequest(resolver, notOwned).intentSender
+        } else {
+            null
+        }
+        return DeleteOutcome(deleted, request)
+    }
+
+    private fun write(name: String, type: MediaType, size: Long, open: () -> InputStream?): SaveResult {
+        if (!hasEnoughSpace(availableBytes(), size)) return SaveResult.Failed(SaveResult.Reason.LOW_STORAGE)
+
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, StatusFolderValidator.mimeTypeOf(name))
+            put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath(type))
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
+        }
+        val target = resolver.insert(collection(type), values)
+            ?: return SaveResult.Failed(SaveResult.Reason.UNKNOWN)
+
+        return try {
+            val input = open() ?: throw FileNotFoundException()
+            input.use { src ->
+                resolver.openOutputStream(target)?.use { dst -> src.copyTo(dst, BUFFER_SIZE) }
+                    ?: throw FileNotFoundException()
+            }
+            values.clear()
+            values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+            resolver.update(target, values, null, null)
+            SaveResult.Saved(target)
+        } catch (e: Exception) {
+            runCatching { resolver.delete(target, null, null) }
+            val reason = if (e is FileNotFoundException) SaveResult.Reason.SOURCE_MISSING else SaveResult.Reason.UNKNOWN
+            SaveResult.Failed(reason)
+        }
+    }
+
+    /** Duplicate check: same name + same size in our folder. */
+    private fun findExisting(name: String, size: Long, type: MediaType): Uri? {
+        val selection = "${MediaStore.MediaColumns.DISPLAY_NAME}=? AND ${MediaStore.MediaColumns.SIZE}=? " +
+            "AND ${MediaStore.MediaColumns.RELATIVE_PATH}=?"
+        val args = arrayOf(name, size.toString(), relativePath(type))
+        return runCatching {
+            resolver.query(collection(type), arrayOf(MediaStore.MediaColumns._ID), selection, args, null)?.use { c ->
+                if (c.moveToFirst()) ContentUris.withAppendedId(collection(type), c.getLong(0)) else null
+            }
+        }.getOrNull()
+    }
+
+    private fun queryCollection(type: MediaType): List<StatusItem> {
+        val projection = arrayOf(
+            MediaStore.MediaColumns._ID,
+            MediaStore.MediaColumns.DISPLAY_NAME,
+            MediaStore.MediaColumns.SIZE,
+            MediaStore.MediaColumns.DATE_MODIFIED,
+            MediaStore.MediaColumns.MIME_TYPE,
+        )
+        val selection = "${MediaStore.MediaColumns.RELATIVE_PATH}=?"
+        val collection = collection(type)
+        val result = mutableListOf<StatusItem>()
+        runCatching {
+            resolver.query(collection, projection, selection, arrayOf(relativePath(type)), null)?.use { c ->
+                while (c.moveToNext()) {
+                    val name = c.getString(1) ?: continue
+                    result += StatusItem(
+                        uri = ContentUris.withAppendedId(collection, c.getLong(0)),
+                        name = name,
+                        size = c.getLong(2),
+                        lastModified = c.getLong(3) * 1000L,
+                        type = type,
+                        mimeType = c.getString(4) ?: StatusFolderValidator.mimeTypeOf(name),
+                        source = null,
+                    )
+                }
+            }
+        }
+        return result
+    }
+
+    private fun availableBytes(): Long = runCatching {
+        StatFs(Environment.getExternalStorageDirectory().path).availableBytes
+    }.getOrDefault(Long.MAX_VALUE)
+
+    companion object {
+        const val FOLDER_NAME = "StatusSaver"
+        private const val BUFFER_SIZE = 64 * 1024
+        private const val SPACE_MARGIN_BYTES = 20L * 1024 * 1024
+
+        fun relativePath(type: MediaType): String = when (type) {
+            MediaType.IMAGE -> "${Environment.DIRECTORY_PICTURES}/$FOLDER_NAME/"
+            MediaType.VIDEO -> "${Environment.DIRECTORY_MOVIES}/$FOLDER_NAME/"
+        }
+
+        fun collection(type: MediaType): Uri = when (type) {
+            MediaType.IMAGE -> MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            MediaType.VIDEO -> MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        }
+
+        /** Keeps a safety margin so saving never fills the device completely. */
+        fun hasEnoughSpace(availableBytes: Long, neededBytes: Long): Boolean =
+            availableBytes - neededBytes > SPACE_MARGIN_BYTES
+    }
+}
