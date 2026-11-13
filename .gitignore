@@ -7,6 +7,7 @@ captures/
 .cxx/
 *.apk
 *.aab
+*.idsig
 *.ap_
 *.dex
 output.json
