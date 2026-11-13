@@ -1,0 +1,39 @@
+# ---------- Gradle / build ----------
+.gradle/
+build/
+**/build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+output.json
+release/
+
+# ---------- Local config & secrets (NEVER commit) ----------
+local.properties
+*.jks
+*.keystore
+keystore.properties
+google-services.json
+*.p12
+*.pem
+
+# ---------- Android Studio / IntelliJ ----------
+*.iml
+.idea/*
+!.idea/codeStyles/
+!.idea/dictionaries/
+.navigation/
+*.hprof
+
+# ---------- Kotlin ----------
+.kotlin/
+
+# ---------- OS / misc ----------
+.DS_Store
+Thumbs.db
+*.log
+*.tmp

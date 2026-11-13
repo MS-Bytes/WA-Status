@@ -1,0 +1,30 @@
+# =============================================================================
+# Copy this file to `local.properties` (same folder) and fill in your values.
+# local.properties is git-ignored — NEVER commit real IDs or passwords.
+# The same keys can be provided as environment variables (e.g. GitHub Secrets).
+# =============================================================================
+
+# Path to the Android SDK (Android Studio writes this automatically)
+sdk.dir=/path/to/Android/Sdk
+
+# ----------------------------- AdMob (release only) --------------------------
+# Debug builds ALWAYS use Google's official test IDs.
+# Release builds use these values only when ALL six are set; otherwise they
+# fall back to test IDs and Gradle prints a warning.
+ADMOB_APP_ID=ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
+ADMOB_BANNER_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_INTERSTITIAL_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_NATIVE_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_APP_OPEN_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_REWARDED_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+
+# Optional global kill-switch: false builds the app with all ads disabled.
+ADS_ENABLED=true
+
+# ----------------------------- Release signing -------------------------------
+# Upload key for Play App Signing. Path is relative to the project root
+# (or absolute). Keep the .jks file OUTSIDE version control.
+KEYSTORE_PATH=keystore/upload-keystore.jks
+KEYSTORE_PASSWORD=your_store_password
+KEY_ALIAS=upload
+KEY_PASSWORD=your_key_password
