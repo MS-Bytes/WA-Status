@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- ================= App / branding ================= -->
-    <string name="app_name">Status Saver – Story Downloader</string>
-    <string name="app_short_name">Status Saver</string>
+    <!-- ================= App ================= -->
+    <string name="app_name" translatable="false">WAVAULT</string>
     <string name="developer_name" translatable="false">MS-Bytes</string>
-    <string name="works_with">Works with WhatsApp &amp; WhatsApp Business</string>
-    <string name="disclaimer">This app is not affiliated with, endorsed or sponsored by WhatsApp LLC or Meta. WhatsApp is a trademark of WhatsApp LLC.</string>
+    <string name="disclaimer">WAVAULT is not affiliated with, endorsed or sponsored by WhatsApp LLC or Meta.</string>
     <string name="disclaimer_title">Disclaimer</string>
 
-    <!-- ================= Common actions ================= -->
+    <!-- ================= Actions ================= -->
     <string name="action_cancel">Cancel</string>
     <string name="action_retry">Retry</string>
     <string name="action_save">Save</string>
     <string name="action_share">Share</string>
+    <string name="action_repost">Repost</string>
     <string name="action_delete">Delete</string>
     <string name="action_info">Info</string>
     <string name="action_open">Open</string>
@@ -21,17 +20,19 @@
     <string name="action_next">Next</string>
     <string name="action_back">Back</string>
     <string name="action_skip">Skip</string>
-    <string name="action_get_started">Get started</string>
+    <string name="action_get_started">Get Started</string>
     <string name="action_allow">Allow</string>
+    <string name="action_not_now">Not Now</string>
     <string name="action_edit">Edit</string>
     <string name="action_undo">Undo</string>
     <string name="action_redo">Redo</string>
-    <string name="action_select_all">Select all</string>
-    <string name="action_clear_selection">Clear selection</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_select_all">Select All</string>
+    <string name="action_clear_selection">Clear Selection</string>
     <string name="action_sort">Sort</string>
-    <string name="action_favorite_add">Add to favorites</string>
-    <string name="action_favorite_remove">Remove from favorites</string>
-    <string name="action_install">Install</string>
+    <string name="action_favorite_add">Add To Favorites</string>
+    <string name="action_favorite_remove">Remove From Favorites</string>
+    <string name="action_install">Install WhatsApp</string>
     <string name="action_discard">Discard</string>
     <string name="action_restart">Restart</string>
 
@@ -39,95 +40,89 @@
     <string name="tab_images">Images</string>
     <string name="tab_videos">Videos</string>
     <string name="tab_saved">Saved</string>
-    <string name="source_whatsapp">WhatsApp</string>
-    <string name="source_business">WA Business</string>
     <string name="badge_new">NEW</string>
-    <string name="sort_newest">Newest first</string>
-    <string name="sort_oldest">Oldest first</string>
-    <string name="sort_largest">Largest first</string>
-    <string name="sort_smallest">Smallest first</string>
+    <string name="sort_newest">Newest First</string>
+    <string name="sort_oldest">Oldest First</string>
+    <string name="sort_largest">Largest First</string>
+    <string name="sort_smallest">Smallest First</string>
     <string name="filter_all">All</string>
-    <string name="filter_images">Images only</string>
-    <string name="filter_videos">Videos only</string>
+    <string name="filter_images">Images</string>
+    <string name="filter_videos">Videos</string>
     <string name="filter_favorites">Favorites</string>
-    <string name="menu_direct_chat">Direct chat</string>
-    <string name="menu_how_to_use">How to use</string>
+    <string name="menu_faq">FAQ</string>
 
-    <!-- ================= Empty / error states ================= -->
-    <string name="empty_images_title">No image statuses yet</string>
-    <string name="empty_videos_title">No video statuses yet</string>
-    <string name="empty_statuses_body">Open the Updates tab in WhatsApp once so it downloads the latest statuses, then come back and pull to refresh.</string>
-    <string name="empty_saved_title">Nothing saved yet</string>
-    <string name="empty_saved_body">Statuses you download appear here. Tap the download button on any status to save it.</string>
-    <string name="empty_favorites_title">No favorites</string>
-    <string name="empty_favorites_body">Tap the heart icon on a status to add it to favorites.</string>
+    <!-- ================= Empty / Error ================= -->
+    <string name="empty_images_title">No Image Statuses</string>
+    <string name="empty_videos_title">No Video Statuses</string>
+    <string name="empty_statuses_body">New Statuses Appear Here Automatically.</string>
+    <string name="empty_saved_title">Nothing Saved Yet</string>
+    <string name="empty_saved_body">Tap The Download Button On Any Status.</string>
+    <string name="empty_favorites_title">No Favorites</string>
+    <string name="empty_favorites_body">Tap The Heart Icon To Add Favorites.</string>
     <string name="open_whatsapp">Open WhatsApp</string>
-    <string name="open_whatsapp_business">Open WhatsApp Business</string>
-    <string name="not_installed_title">%1$s is not installed</string>
-    <string name="not_installed_body">Install %1$s to view and save its statuses, or switch to the other app above.</string>
-    <string name="error_title">Something went wrong</string>
-    <string name="error_load_statuses">Could not load statuses. Please try again.</string>
-    <string name="error_file_corrupted">This file is damaged and cannot be opened.</string>
-    <string name="error_file_missing">This status is no longer available. It may have expired.</string>
-    <string name="error_low_storage">Not enough storage space. Free up some space and try again.</string>
-    <string name="error_no_app_to_open">No app found to open this file.</string>
+    <string name="not_installed_title">WhatsApp Not Found</string>
+    <string name="not_installed_body">Install WhatsApp Or WhatsApp Business To Use WAVAULT.</string>
+    <string name="error_title">Something Went Wrong</string>
+    <string name="error_load_statuses">Could Not Load Statuses</string>
+    <string name="error_file_corrupted">This File Cannot Be Opened</string>
+    <string name="error_file_missing">This Status Is No Longer Available</string>
+    <string name="error_low_storage">Not Enough Storage Space</string>
+    <string name="error_no_app_to_open">No App Found To Open This</string>
+    <string name="error_storage_permission">Storage Permission Is Required To Save</string>
 
-    <!-- ================= Folder permission ================= -->
-    <string name="permission_title">Allow access to statuses</string>
-    <string name="permission_body">To show statuses, %1$s needs read access to the %2$s status folder. Your files never leave your device.</string>
-    <string name="permission_step_1">Tap “Grant access” below</string>
-    <string name="permission_step_2">On the next screen tap “Use this folder”</string>
-    <string name="permission_step_3">Tap “Allow” to confirm</string>
-    <string name="permission_grant">Grant access</string>
-    <string name="permission_granted">Access granted</string>
-    <string name="permission_wrong_folder_title">Wrong folder selected</string>
-    <string name="permission_wrong_folder_body">Please select the “.Statuses” folder without changing location. Tap “Grant access” and then “Use this folder”.</string>
-    <string name="permission_revoked_title">Access was removed</string>
-    <string name="permission_revoked_body">Access to the %1$s status folder was revoked. Grant it again to keep viewing statuses.</string>
-    <string name="permission_folder_missing">The status folder was not found. Open %1$s, view the Updates tab once and try again.</string>
-    <string name="permission_why_title">Why is this needed?</string>
-    <string name="permission_why_body">Android keeps status files in a protected folder. Android only lets apps read it after you approve that one folder. We do not access any other files.</string>
-    <string name="permission_notifications_title">Stay updated</string>
-    <string name="permission_notifications_body">Allow notifications to get alerts when new statuses are available or auto-saved.</string>
-    <string name="permission_denied_permanently">Permission was denied. You can enable it from app settings.</string>
-    <string name="open_app_settings">Open app settings</string>
-    <string name="folder_access_granted">Access granted</string>
-    <string name="folder_access_not_granted">Not granted</string>
+    <!-- ================= Permission ================= -->
+    <string name="permission_title">Allow Status Access</string>
+    <string name="permission_body">One-Time Access To The WhatsApp Media Folder. Works With WhatsApp And WhatsApp Business.</string>
+    <string name="permission_step_1">Tap Grant Access</string>
+    <string name="permission_step_2">Tap Use This Folder</string>
+    <string name="permission_step_3">Tap Allow</string>
+    <string name="permission_grant">Grant Access</string>
+    <string name="permission_granted">Access Granted</string>
+    <string name="permission_wrong_folder_title">Wrong Folder</string>
+    <string name="permission_wrong_folder_body">Do Not Change The Folder. Just Tap Use This Folder.</string>
+    <string name="permission_revoked_title">Access Removed</string>
+    <string name="permission_revoked_body">Grant Access Again To See Statuses.</string>
+    <string name="permission_folder_missing_title">Statuses Folder Not Found</string>
+    <string name="permission_folder_missing">Open WhatsApp Once, Then Come Back.</string>
+    <string name="permission_why_title">Why Is This Needed?</string>
+    <string name="permission_why_body">Android Protects Status Files. WAVAULT Reads Only Statuses And Never Uploads Anything.</string>
+    <string name="permission_notifications_title">New Status Alerts</string>
+    <string name="permission_notifications_body">Get Notified When New Statuses Arrive.</string>
+    <string name="permission_denied_permanently">Permission Denied. Enable It In App Settings.</string>
+    <string name="open_app_settings">Open Settings</string>
 
     <!-- ================= Onboarding ================= -->
-    <string name="onboarding_1_title">Save statuses in one tap</string>
-    <string name="onboarding_1_body">Download photo and video statuses in original quality, straight to your gallery.</string>
-    <string name="onboarding_2_title">Edit &amp; repost</string>
-    <string name="onboarding_2_body">Crop, add text, draw, trim videos and repost your favorite statuses.</string>
-    <string name="onboarding_3_title">Private by design</string>
-    <string name="onboarding_3_body">No login, no QR scanning. Everything happens on your device, and nothing is uploaded.</string>
-    <string name="onboarding_4_title">One quick step</string>
-    <string name="onboarding_4_body">Next, allow access to the status folder. If a status is missing, open the Updates tab in WhatsApp once and come back.</string>
-    <string name="onboarding_privacy_notice">By continuing you agree to our Privacy Policy.</string>
+    <string name="onboarding_1_title">Save Statuses In One Tap</string>
+    <string name="onboarding_1_body">Photos And Videos In Original Quality.</string>
+    <string name="onboarding_2_title">Auto Detect New Statuses</string>
+    <string name="onboarding_2_body">Get Notified When New Statuses Arrive.</string>
+    <string name="onboarding_3_title">Edit And Repost</string>
+    <string name="onboarding_3_body">Crop, Filters, Text, Draw And Video Trim.</string>
+    <string name="onboarding_4_title">Private And Secure</string>
+    <string name="onboarding_4_body">No Login. No Upload. Everything Stays On Your Phone.</string>
+    <string name="onboarding_privacy_notice">Privacy Policy</string>
 
-    <!-- ================= Save / share / delete ================= -->
-    <string name="save_success">Saved to gallery</string>
-    <string name="save_already">Already saved</string>
-    <string name="save_failed">Could not save. Please try again.</string>
+    <!-- ================= Save / Share / Delete ================= -->
+    <string name="save_success">Saved To Gallery</string>
+    <string name="save_already">Already Saved</string>
+    <string name="save_failed">Could Not Save</string>
     <plurals name="saved_count">
-        <item quantity="one">%d status saved</item>
-        <item quantity="other">%d statuses saved</item>
+        <item quantity="one">%d Status Saved</item>
+        <item quantity="other">%d Statuses Saved</item>
     </plurals>
-    <string name="share_chooser_title">Share via</string>
-    <string name="repost_to_whatsapp">Repost to WhatsApp</string>
-    <string name="repost_to_business">Repost to WhatsApp Business</string>
-    <string name="repost_not_installed">The selected app is not installed.</string>
+    <string name="share_chooser_title">Share Via</string>
+    <string name="repost_chooser_title">Repost To</string>
     <string name="delete_confirm_title">Delete?</string>
     <plurals name="delete_confirm_body">
-        <item quantity="one">%d saved file will be permanently deleted from your device.</item>
-        <item quantity="other">%d saved files will be permanently deleted from your device.</item>
+        <item quantity="one">%d File Will Be Deleted Permanently.</item>
+        <item quantity="other">%d Files Will Be Deleted Permanently.</item>
     </plurals>
     <plurals name="deleted_count">
-        <item quantity="one">%d file deleted</item>
-        <item quantity="other">%d files deleted</item>
+        <item quantity="one">%d File Deleted</item>
+        <item quantity="other">%d Files Deleted</item>
     </plurals>
 
-    <!-- ================= Info sheet ================= -->
+    <!-- ================= Info ================= -->
     <string name="info_title">Details</string>
     <string name="info_name">Name</string>
     <string name="info_size">Size</string>
@@ -140,31 +135,31 @@
     <!-- ================= Viewer ================= -->
     <string name="viewer_mute">Mute</string>
     <string name="viewer_unmute">Unmute</string>
-    <string name="viewer_loop_on">Loop on</string>
-    <string name="viewer_loop_off">Loop off</string>
-    <string name="viewer_position">%1$d of %2$d</string>
+    <string name="viewer_loop_on">Loop On</string>
+    <string name="viewer_loop_off">Loop Off</string>
+    <string name="viewer_position">%1$d / %2$d</string>
 
     <!-- ================= Editor ================= -->
     <string name="editor_title">Edit</string>
     <string name="editor_crop">Crop</string>
     <string name="editor_rotate">Rotate</string>
-    <string name="editor_flip_horizontal">Flip horizontal</string>
-    <string name="editor_flip_vertical">Flip vertical</string>
+    <string name="editor_flip_horizontal">Flip Horizontal</string>
+    <string name="editor_flip_vertical">Flip Vertical</string>
     <string name="editor_adjust">Adjust</string>
     <string name="editor_brightness">Brightness</string>
     <string name="editor_contrast">Contrast</string>
     <string name="editor_saturation">Saturation</string>
     <string name="editor_filters">Filters</string>
     <string name="editor_text">Text</string>
-    <string name="editor_add_text">Add text</string>
-    <string name="editor_text_hint">Type something…</string>
+    <string name="editor_add_text">Add Text</string>
+    <string name="editor_text_hint">Type Here</string>
     <string name="editor_color">Color</string>
     <string name="editor_size">Size</string>
     <string name="editor_draw">Draw</string>
-    <string name="editor_brush_size">Brush size</string>
+    <string name="editor_brush_size">Brush</string>
     <string name="editor_eraser">Eraser</string>
     <string name="editor_trim">Trim</string>
-    <string name="editor_mute_audio">Remove audio</string>
+    <string name="editor_mute_audio">Remove Audio</string>
     <string name="editor_aspect_free">Free</string>
     <string name="editor_aspect_square" translatable="false">1:1</string>
     <string name="editor_aspect_4_5" translatable="false">4:5</string>
@@ -178,159 +173,141 @@
     <string name="filter_sepia">Sepia</string>
     <string name="filter_fade">Fade</string>
     <string name="filter_noir">Noir</string>
-    <string name="editor_saving_progress">Saving… %1$d%%</string>
-    <string name="editor_saved">Edited copy saved. The original is unchanged.</string>
-    <string name="editor_failed">Could not export the edited file.</string>
-    <string name="editor_discard_title">Discard changes?</string>
-    <string name="editor_discard_body">Your edits will be lost.</string>
+    <string name="editor_saving_progress">Saving %1$d%%</string>
+    <string name="editor_saved">Edited Copy Saved</string>
+    <string name="editor_failed">Could Not Save Edit</string>
+    <string name="editor_discard_title">Discard Changes?</string>
+    <string name="editor_discard_body">Your Edits Will Be Lost.</string>
     <string name="editor_trim_range">%1$s – %2$s</string>
 
     <!-- ================= Multi-select ================= -->
     <plurals name="selected_count">
-        <item quantity="one">%d selected</item>
-        <item quantity="other">%d selected</item>
+        <item quantity="one">%d Selected</item>
+        <item quantity="other">%d Selected</item>
     </plurals>
-    <string name="bulk_save">Save selected</string>
-    <string name="bulk_share">Share selected</string>
-    <string name="bulk_delete">Delete selected</string>
+    <string name="bulk_save">Save</string>
+    <string name="bulk_share">Share</string>
+    <string name="bulk_delete">Delete</string>
 
     <!-- ================= Settings ================= -->
     <string name="settings_title">Settings</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
-    <string name="theme_system">System default</string>
+    <string name="theme_system">System Default</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
-    <string name="settings_dynamic_color">Dynamic color</string>
-    <string name="settings_dynamic_color_desc">Use colors from your wallpaper (Android 12+)</string>
-    <string name="settings_auto_save">Auto-save</string>
-    <string name="settings_auto_save_whatsapp">Auto-save WhatsApp statuses</string>
-    <string name="settings_auto_save_business">Auto-save WA Business statuses</string>
-    <string name="settings_auto_save_desc">New statuses are saved to your gallery automatically.</string>
-    <string name="settings_notifications">Notifications</string>
-    <string name="settings_notify_new">New status alerts</string>
-    <string name="settings_notify_new_desc">Check every 15 minutes and notify when new statuses are available.</string>
-    <string name="settings_privacy_security">Privacy &amp; security</string>
+    <string name="settings_dynamic_color">Dynamic Color</string>
+    <string name="settings_status_access">Status Access</string>
+    <string name="settings_folder_access">Folder Access</string>
+    <string name="folder_access_granted">Granted</string>
+    <string name="folder_access_not_granted">Not Granted</string>
+    <string name="folder_access_revoke">Remove Access</string>
+    <string name="folder_access_revoke_body">WAVAULT Will Stop Showing Statuses Until You Grant Access Again.</string>
+    <string name="settings_automation">Automation</string>
+    <string name="settings_auto_save">Auto-Save New Statuses</string>
+    <string name="settings_notify_new">New Status Alerts</string>
+    <string name="settings_notify_new_desc">Checks Every 15 Minutes In Background</string>
+    <string name="settings_privacy_security">Privacy And Security</string>
     <string name="settings_app_lock">App Lock</string>
-    <string name="settings_app_lock_desc">Require a PIN or biometrics to open the app</string>
     <string name="settings_change_pin">Change PIN</string>
-    <string name="settings_biometric">Unlock with biometrics</string>
-    <string name="settings_storage">Storage</string>
-    <string name="settings_storage_usage">Saved statuses</string>
-    <string name="settings_storage_summary" tools:ignore="PluralsCandidate">%1$s · %2$d images · %3$d videos</string>
-    <string name="settings_folder_access">Folder access</string>
-    <string name="settings_ads">Ads</string>
-    <string name="settings_remove_interstitials">Watch an ad for 30 minutes without full-screen ads</string>
-    <string name="settings_ad_free_active">Full-screen ads paused until %1$s</string>
-    <string name="settings_privacy_options">Ad privacy options</string>
-    <string name="settings_privacy_options_desc">Review or change your ad consent choices</string>
+    <string name="settings_biometric">Unlock With Fingerprint</string>
+    <string name="settings_privacy_choices">Privacy Choices</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_storage">Storage</string>
+    <string name="settings_storage_usage">Saved Statuses</string>
+    <string name="settings_storage_summary" tools:ignore="PluralsCandidate">%1$s · %2$d Images · %3$d Videos</string>
     <string name="settings_support">Support</string>
-    <string name="settings_how_to_use">How to use &amp; FAQ</string>
-    <string name="settings_rate">Rate the app</string>
-    <string name="settings_share">Share the app</string>
+    <string name="settings_faq">FAQ</string>
+    <string name="settings_rate">Rate App</string>
+    <string name="settings_share">Share App</string>
+    <string name="settings_check_updates">Check For Updates</string>
     <string name="settings_about">About</string>
-    <string name="settings_check_updates">Check for updates</string>
-    <string name="share_app_text">Save photo &amp; video statuses easily with Status Saver: %1$s</string>
+    <string name="share_app_text">Save WhatsApp Statuses With WAVAULT: %1$s</string>
+    <string name="update_none">You Have The Latest Version</string>
 
-    <!-- ================= Direct chat ================= -->
-    <string name="direct_chat_title">Direct chat</string>
-    <string name="direct_chat_desc">Message any number without saving it to your contacts.</string>
-    <string name="direct_chat_country_code">Country code</string>
-    <string name="direct_chat_phone">Phone number</string>
-    <string name="direct_chat_message">Message (optional)</string>
-    <string name="direct_chat_invalid">Enter a valid phone number</string>
-    <string name="direct_chat_search_country">Search country</string>
-    <string name="direct_chat_open_in">Open in</string>
+    <!-- ================= Donate ================= -->
+    <string name="donate_title">Donate</string>
+    <string name="donate_subtitle">Support Development With USDT</string>
+    <string name="donate_network">Network: TRON (TRC20)</string>
+    <string name="donate_warning">Send Only USDT On TRC20. Other Coins Or Networks Will Be Lost.</string>
+    <string name="donate_copied">Address Copied</string>
+    <string name="donate_address" translatable="false">TWtSsqY1enCWqcSfi8Kac4J9obkQR7iJsb</string>
 
-    <!-- ================= App lock ================= -->
+    <!-- ================= App Lock ================= -->
     <string name="lock_enter_pin">Enter PIN</string>
-    <string name="lock_set_pin">Create a 4-digit PIN</string>
-    <string name="lock_confirm_pin">Confirm your PIN</string>
-    <string name="lock_pin_mismatch">PINs don’t match. Try again.</string>
+    <string name="lock_set_pin">Create 4-Digit PIN</string>
+    <string name="lock_confirm_pin">Confirm PIN</string>
+    <string name="lock_pin_mismatch">PINs Do Not Match</string>
     <string name="lock_wrong_pin">Wrong PIN</string>
-    <string name="lock_too_many_attempts">Too many attempts. Try again in %1$ds.</string>
-    <string name="lock_use_biometric">Use biometrics</string>
-    <string name="lock_biometric_title">Unlock Status Saver</string>
-    <string name="lock_biometric_subtitle">Confirm it’s you</string>
-    <string name="lock_pin_set">App Lock enabled</string>
-    <string name="lock_disabled">App Lock disabled</string>
+    <string name="lock_too_many_attempts">Try Again In %1$ds</string>
+    <string name="lock_use_biometric">Use Fingerprint</string>
+    <string name="lock_biometric_title">Unlock WAVAULT</string>
+    <string name="lock_pin_set">App Lock Enabled</string>
+    <string name="lock_disabled">App Lock Disabled</string>
 
     <!-- ================= Notifications ================= -->
-    <string name="channel_new_statuses">New statuses</string>
-    <string name="channel_new_statuses_desc">Alerts when new statuses are available</string>
-    <string name="channel_auto_save">Auto-save</string>
-    <string name="channel_auto_save_desc">Confirmation when statuses are auto-saved</string>
+    <string name="channel_new_statuses">New Statuses</string>
+    <string name="channel_auto_save">Auto-Save</string>
     <plurals name="notif_new_statuses">
-        <item quantity="one">%d new status available</item>
-        <item quantity="other">%d new statuses available</item>
+        <item quantity="one">%d New Status</item>
+        <item quantity="other">%d New Statuses</item>
     </plurals>
     <plurals name="notif_auto_saved">
-        <item quantity="one">%d status auto-saved</item>
-        <item quantity="other">%d statuses auto-saved</item>
+        <item quantity="one">%d Status Auto-Saved</item>
+        <item quantity="other">%d Statuses Auto-Saved</item>
     </plurals>
-    <string name="notif_tap_to_view">Tap to view</string>
+    <string name="notif_tap_to_view">Tap To View</string>
 
     <!-- ================= Widget ================= -->
-    <string name="widget_name">New statuses</string>
-    <string name="widget_description">Shows how many new statuses are available</string>
+    <string name="widget_name">New Statuses</string>
+    <string name="widget_description">Shows New Status Count</string>
     <plurals name="widget_new_count">
-        <item quantity="one">%d new</item>
-        <item quantity="other">%d new</item>
+        <item quantity="one">%d New</item>
+        <item quantity="other">%d New</item>
     </plurals>
-    <string name="widget_no_new">No new statuses</string>
+    <string name="widget_no_new">No New Statuses</string>
 
     <!-- ================= About ================= -->
-    <string name="about_title">About</string>
     <string name="about_version">Version %1$s</string>
-    <string name="about_developer">Developed by %1$s</string>
-    <string name="about_contact">Contact us</string>
-    <string name="about_description">Status Saver helps you save, edit and share photo and video statuses that are already stored on your device.</string>
+    <string name="about_developer">By %1$s</string>
+    <string name="about_contact">Contact Us</string>
 
-    <!-- ================= How to use / FAQ ================= -->
-    <string name="faq_title">How to use &amp; FAQ</string>
-    <string name="howto_step_1">Open WhatsApp and view the Updates tab so statuses are downloaded to your phone.</string>
-    <string name="howto_step_2">Open Status Saver. Your statuses appear under Images and Videos.</string>
-    <string name="howto_step_3">Tap the download button to save a status to your gallery.</string>
-    <string name="howto_step_4">Find your downloads in the Saved tab or in your Gallery (Pictures/StatusSaver and Movies/StatusSaver).</string>
-    <string name="faq_q1">Why don’t I see any statuses?</string>
-    <string name="faq_a1">WhatsApp only stores statuses after they load in its Updates tab. Open the Updates tab once, return here and pull down to refresh.</string>
-    <string name="faq_q2">Will the person know I saved their status?</string>
-    <string name="faq_a2">This app only reads files that are already on your device. It never contacts WhatsApp servers and sends nothing to anyone.</string>
-    <string name="faq_q3">Why does the app need folder access?</string>
-    <string name="faq_a3">Android protects the status folder. You approve access to that single folder once; no other files are read.</string>
-    <string name="faq_q4">Where are saved files stored?</string>
-    <string name="faq_a4">Images go to Pictures/StatusSaver and videos to Movies/StatusSaver. They appear in your gallery immediately.</string>
-    <string name="faq_q5">Statuses disappeared after 24 hours?</string>
-    <string name="faq_a5">WhatsApp deletes statuses after 24 hours. Save the ones you want to keep, or turn on Auto-save in Settings.</string>
-    <string name="faq_q6">Does it work with WhatsApp Business?</string>
-    <string name="faq_a6">Yes. Use the app switcher at the top of the home screen and grant access to the WhatsApp Business folder.</string>
+    <!-- ================= FAQ ================= -->
+    <string name="faq_title">FAQ</string>
+    <string name="faq_q1">How Do I Save A Status?</string>
+    <string name="faq_a1">Grant folder access once, then tap the download button on any image or video. Saved files go to Pictures/WAVAULT and Movies/WAVAULT and appear in your gallery.</string>
+    <string name="faq_q2">Does It Work With WhatsApp Business?</string>
+    <string name="faq_a2">Yes. WAVAULT shows statuses from WhatsApp and WhatsApp Business together. No switching needed.</string>
+    <string name="faq_q3">How Are New Statuses Detected?</string>
+    <string name="faq_a3">WAVAULT checks every few seconds while open and every 15 minutes in the background, and notifies you when a new status file appears. Keep New Status Alerts on in Settings.</string>
+    <string name="faq_q4">Why Is A Status Missing?</string>
+    <string name="faq_a4">WAVAULT can only show statuses that WhatsApp has already downloaded to your phone. WhatsApp often downloads them in the background, especially on Wi-Fi. If one is missing, open WhatsApp once and it will appear here automatically.</string>
+    <string name="faq_q5">Will The Person Know I Saved It?</string>
+    <string name="faq_a5">No. WAVAULT only reads files on your phone. It never contacts WhatsApp or sends anything.</string>
+    <string name="faq_q6">Why Is Folder Access Needed?</string>
+    <string name="faq_a6">Android protects WhatsApp media files. You allow access once and WAVAULT reads only status files.</string>
+    <string name="faq_q7">Why Do Statuses Disappear?</string>
+    <string name="faq_a7">WhatsApp deletes statuses after 24 hours. Save them, or turn on Auto-Save in Settings.</string>
+    <string name="faq_q8">Can I Edit Before Reposting?</string>
+    <string name="faq_a8">Yes. Open a status, tap Edit, and crop, add filters, text or drawing, or trim videos. The original file is never changed.</string>
 
-    <!-- ================= In-app update / review ================= -->
-    <string name="update_downloaded">An update has been downloaded.</string>
+    <!-- ================= Update ================= -->
+    <string name="update_downloaded">Update Downloaded</string>
 
     <!-- ================= Ads ================= -->
     <string name="ad_label">Ad</string>
-    <string name="ad_rewarded_unavailable">No ad available right now. Please try again later.</string>
-    <string name="ad_rewarded_granted">Thanks! Full-screen ads are paused for 30 minutes.</string>
 
-    <!-- ================= Content descriptions (accessibility) ================= -->
-    <string name="cd_app_logo">Status Saver logo</string>
-    <string name="cd_status_image">Image status</string>
-    <string name="cd_status_video">Video status, %1$s</string>
-    <string name="cd_download">Download status</string>
-    <string name="cd_downloaded">Already downloaded</string>
+    <!-- ================= Accessibility ================= -->
+    <string name="cd_app_logo">WAVAULT Logo</string>
+    <string name="cd_status_image">Image Status</string>
+    <string name="cd_status_video">Video Status, %1$s</string>
+    <string name="cd_download">Download</string>
+    <string name="cd_downloaded">Downloaded</string>
     <string name="cd_selected">Selected</string>
-    <string name="cd_not_selected">Not selected</string>
+    <string name="cd_not_selected">Not Selected</string>
     <string name="cd_favorite">Favorite</string>
-    <string name="cd_back">Navigate back</string>
-    <string name="cd_more_options">More options</string>
-    <string name="cd_settings">Open settings</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_more_options">More Options</string>
+    <string name="cd_settings">Settings</string>
     <string name="cd_illustration">Illustration</string>
-
-    <!-- ================= Added during implementation ================= -->
-    <string name="folder_access_revoke">Remove access</string>
-    <string name="folder_access_revoke_body">Status Saver will no longer be able to read %1$s statuses until you grant access again.</string>
-    <string name="update_none">You’re using the latest version.</string>
-    <string name="faq_heading">Frequently asked questions</string>
 </resources>

@@ -6,23 +6,35 @@ import com.msbytes.statussaver.domain.model.StatusSource
 /** Pure helpers (no Android dependencies) so they can be unit-tested on the JVM. */
 object StatusFolderValidator {
 
+    data class StatusFolder(val source: StatusSource, val path: String)
+
+    /** Every known status folder of every supported app. */
+    val allFolders: List<StatusFolder> =
+        StatusSource.entries.flatMap { source -> source.folderPaths.map { StatusFolder(source, it) } }
+
     private val imageExtensions = setOf("jpg", "jpeg", "png", "webp", "gif")
     private val videoExtensions = setOf("mp4", "3gp")
 
     /**
-     * @param treeDocumentId e.g. `primary:Android/media/com.whatsapp/WhatsApp/Media/.Statuses`
+     * Status folders reachable from a granted tree, e.g. `primary:Android/media` covers both
+     * WhatsApp and WhatsApp Business; `primary:` (storage root, Android 10 and older) covers all.
      */
-    fun matches(treeDocumentId: String, source: StatusSource): Boolean {
-        if (!treeDocumentId.contains(':')) return false
+    fun coveredFolders(treeDocumentId: String): List<StatusFolder> {
+        if (!treeDocumentId.contains(':')) return emptyList()
         val path = treeDocumentId.substringAfter(':').trim('/')
-        return source.folderPaths.any { it.equals(path, ignoreCase = true) }
+        return allFolders.filter { folder ->
+            path.isEmpty() ||
+                folder.path.equals(path, ignoreCase = true) ||
+                folder.path.startsWith("$path/", ignoreCase = true)
+        }
     }
+
+    fun volumeOf(treeDocumentId: String): String = treeDocumentId.substringBefore(':')
 
     /** Media type for a supported status file, or null for .nomedia / unsupported files. */
     fun mediaTypeOf(fileName: String): MediaType? {
         if (fileName.startsWith(".")) return null
-        val ext = fileName.substringAfterLast('.', "").lowercase()
-        return when (ext) {
+        return when (fileName.substringAfterLast('.', "").lowercase()) {
             in imageExtensions -> MediaType.IMAGE
             in videoExtensions -> MediaType.VIDEO
             else -> null

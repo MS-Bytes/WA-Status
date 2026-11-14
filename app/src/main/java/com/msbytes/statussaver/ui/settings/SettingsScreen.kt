@@ -33,10 +33,10 @@ import androidx.compose.material.icons.rounded.Password
 import androidx.compose.material.icons.rounded.Policy
 import androidx.compose.material.icons.rounded.PrivacyTip
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.rounded.SmartDisplay
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,24 +67,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.msbytes.statussaver.BuildConfig
 import com.msbytes.statussaver.R
+import com.msbytes.statussaver.ads.LocalAdManager
 import com.msbytes.statussaver.core.Formatters
 import com.msbytes.statussaver.core.IntentUtils
-import com.msbytes.statussaver.domain.model.StatusSource
 import com.msbytes.statussaver.domain.model.ThemeMode
-import com.msbytes.statussaver.play.PlayStoreHelper
 import com.msbytes.statussaver.ui.common.AppSnackbarHost
 import com.msbytes.statussaver.ui.components.ConfirmDialog
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.launch
-
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface PlayStoreEntryPoint {
-    fun playStoreHelper(): PlayStoreHelper
-}
 
 @Composable
 fun SettingsScreen(
@@ -95,24 +84,28 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val storage by viewModel.storage.collectAsStateWithLifecycle()
-    val access by viewModel.access.collectAsStateWithLifecycle()
-    val adsEnabled by viewModel.adManager.adsEnabled.collectAsStateWithLifecycle()
+    val hasAccess by viewModel.hasAccess.collectAsStateWithLifecycle()
     val privacyOptionsRequired by viewModel.consentManager.privacyOptionsRequired.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     val activity = LocalActivity.current
+    val adManager = LocalAdManager.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
-    val playStore = remember { EntryPointAccessors.fromApplication(context.applicationContext, PlayStoreEntryPoint::class.java).playStoreHelper() }
+    val playStore = viewModel.playStoreHelper
 
     var themeDialog by remember { mutableStateOf(false) }
     var pinDialog by remember { mutableStateOf(false) }
+    var donateDialog by remember { mutableStateOf(false) }
     var notifRationale by remember { mutableStateOf(false) }
     var notifDenied by remember { mutableStateOf(false) }
-    var pickingSource by remember { mutableStateOf<StatusSource?>(null) }
-    var revokeSource by remember { mutableStateOf<StatusSource?>(null) }
+    var revokeDialog by remember { mutableStateOf(false) }
 
     fun message(res: Int) = scope.launch { snackbar.showSnackbar(context.getString(res)) }
+    fun openExternal(intent: Intent) {
+        adManager?.suppressNextAppOpen()
+        runCatching { context.startActivity(intent) }
+    }
 
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
@@ -124,10 +117,8 @@ fun SettingsScreen(
         }
     }
     val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-        val source = pickingSource ?: return@rememberLauncherForActivityResult
-        pickingSource = null
         if (uri != null) {
-            message(if (viewModel.grantAccess(source, uri)) R.string.permission_granted else R.string.permission_wrong_folder_body)
+            message(if (viewModel.grantAccess(uri)) R.string.permission_granted else R.string.permission_wrong_folder_body)
         }
     }
 
@@ -163,61 +154,29 @@ fun SettingsScreen(
             Section(R.string.settings_appearance)
             Item(Icons.Rounded.DarkMode, stringResource(R.string.settings_theme), themeLabel(settings.themeMode)) { themeDialog = true }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                SwitchItem(
-                    Icons.Rounded.Palette,
-                    stringResource(R.string.settings_dynamic_color),
-                    stringResource(R.string.settings_dynamic_color_desc),
-                    settings.dynamicColor,
-                    viewModel::setDynamicColor,
-                )
+                SwitchItem(Icons.Rounded.Palette, stringResource(R.string.settings_dynamic_color), settings.dynamicColor, onChange = viewModel::setDynamicColor)
             }
 
-            Section(R.string.settings_folder_access)
-            StatusSource.entries.forEach { source ->
-                val granted = access[source] == true
-                Item(
-                    Icons.Rounded.Folder,
-                    source.displayName,
-                    stringResource(if (granted) R.string.folder_access_granted else R.string.folder_access_not_granted),
-                ) {
-                    if (granted) {
-                        revokeSource = source
-                    } else {
-                        pickingSource = source
-                        folderPicker.launch(viewModel.initialFolderUri(source))
-                    }
-                }
+            Section(R.string.settings_status_access)
+            Item(
+                Icons.Rounded.Folder,
+                stringResource(R.string.settings_folder_access),
+                stringResource(if (hasAccess) R.string.folder_access_granted else R.string.folder_access_not_granted),
+            ) {
+                if (hasAccess) revokeDialog = true else folderPicker.launch(viewModel.initialFolderUri())
             }
 
-            Section(R.string.settings_auto_save)
-            SwitchItem(
-                Icons.Rounded.AutoMode,
-                stringResource(R.string.settings_auto_save_whatsapp),
-                stringResource(R.string.settings_auto_save_desc),
-                settings.autoSaveWhatsApp,
-            ) { viewModel.setAutoSave(StatusSource.WHATSAPP, it) }
-            SwitchItem(
-                Icons.Rounded.AutoMode,
-                stringResource(R.string.settings_auto_save_business),
-                stringResource(R.string.settings_auto_save_desc),
-                settings.autoSaveBusiness,
-            ) { viewModel.setAutoSave(StatusSource.BUSINESS, it) }
-
-            Section(R.string.settings_notifications)
+            Section(R.string.settings_automation)
+            SwitchItem(Icons.Rounded.AutoMode, stringResource(R.string.settings_auto_save), settings.autoSave, onChange = viewModel::setAutoSave)
             SwitchItem(
                 Icons.Rounded.Notifications,
                 stringResource(R.string.settings_notify_new),
-                stringResource(R.string.settings_notify_new_desc),
                 settings.notifyNewStatuses,
+                subtitle = stringResource(R.string.settings_notify_new_desc),
             ) { if (it) enableNotifications() else viewModel.setNotifications(false) }
 
             Section(R.string.settings_privacy_security)
-            SwitchItem(
-                Icons.Rounded.Lock,
-                stringResource(R.string.settings_app_lock),
-                stringResource(R.string.settings_app_lock_desc),
-                settings.appLockEnabled,
-            ) { enable ->
+            SwitchItem(Icons.Rounded.Lock, stringResource(R.string.settings_app_lock), settings.appLockEnabled) { enable ->
                 if (enable) {
                     pinDialog = true
                 } else {
@@ -228,8 +187,17 @@ fun SettingsScreen(
             if (settings.appLockEnabled) {
                 Item(Icons.Rounded.Password, stringResource(R.string.settings_change_pin), null) { pinDialog = true }
                 if (biometricAvailable) {
-                    SwitchItem(Icons.Rounded.Fingerprint, stringResource(R.string.settings_biometric), null, settings.biometricEnabled, viewModel::setBiometric)
+                    SwitchItem(Icons.Rounded.Fingerprint, stringResource(R.string.settings_biometric), settings.biometricEnabled, onChange = viewModel::setBiometric)
                 }
+            }
+            // Required by Google's consent rules in regions where it applies (EEA, UK, ...).
+            if (privacyOptionsRequired && activity != null) {
+                Item(Icons.Rounded.PrivacyTip, stringResource(R.string.settings_privacy_choices), null) {
+                    viewModel.consentManager.showPrivacyOptionsForm(activity)
+                }
+            }
+            Item(Icons.Rounded.Policy, stringResource(R.string.settings_privacy_policy), null) {
+                openExternal(IntentUtils.openUrl(BuildConfig.PRIVACY_POLICY_URL))
             }
 
             Section(R.string.settings_storage)
@@ -240,54 +208,25 @@ fun SettingsScreen(
                 onClick = null,
             )
 
-            if (adsEnabled || privacyOptionsRequired) {
-                Section(R.string.settings_ads)
-                if (adsEnabled && activity != null) {
-                    val now = System.currentTimeMillis()
-                    Item(
-                        Icons.Rounded.SmartDisplay,
-                        stringResource(R.string.settings_remove_interstitials),
-                        if (settings.adFreeUntil > now) {
-                            stringResource(R.string.settings_ad_free_active, Formatters.time(settings.adFreeUntil))
-                        } else {
-                            null
-                        },
-                    ) {
-                        viewModel.adManager.showRewarded(activity) { rewarded ->
-                            message(if (rewarded) R.string.ad_rewarded_granted else R.string.ad_rewarded_unavailable)
-                        }
-                    }
-                }
-                if (privacyOptionsRequired && activity != null) {
-                    Item(
-                        Icons.Rounded.PrivacyTip,
-                        stringResource(R.string.settings_privacy_options),
-                        stringResource(R.string.settings_privacy_options_desc),
-                    ) { viewModel.consentManager.showPrivacyOptionsForm(activity) }
-                }
-            }
-
             Section(R.string.settings_support)
-            Item(Icons.Rounded.Policy, stringResource(R.string.settings_privacy_policy), null) {
-                viewModel.adManager.suppressNextAppOpen()
-                runCatching { context.startActivity(IntentUtils.openUrl(BuildConfig.PRIVACY_POLICY_URL)) }
+            if (BuildConfig.DONATE_ENABLED) {
+                Item(Icons.Rounded.VolunteerActivism, stringResource(R.string.donate_title), stringResource(R.string.donate_subtitle)) {
+                    donateDialog = true
+                }
             }
-            Item(Icons.AutoMirrored.Rounded.HelpOutline, stringResource(R.string.settings_how_to_use), null, onClick = onOpenFaq)
+            Item(Icons.AutoMirrored.Rounded.HelpOutline, stringResource(R.string.settings_faq), null, onClick = onOpenFaq)
             Item(Icons.Rounded.Star, stringResource(R.string.settings_rate), null) {
-                viewModel.adManager.suppressNextAppOpen()
+                adManager?.suppressNextAppOpen()
                 activity?.let { playStore.openStorePage(it) }
             }
             Item(Icons.Rounded.Share, stringResource(R.string.settings_share), null) {
-                viewModel.adManager.suppressNextAppOpen()
                 val send = Intent(Intent.ACTION_SEND)
                     .setType("text/plain")
                     .putExtra(Intent.EXTRA_TEXT, context.getString(R.string.share_app_text, playStore.storeUrl))
-                runCatching { context.startActivity(Intent.createChooser(send, context.getString(R.string.share_chooser_title))) }
+                openExternal(Intent.createChooser(send, context.getString(R.string.share_chooser_title)))
             }
             Item(Icons.Rounded.SystemUpdate, stringResource(R.string.settings_check_updates), null) {
-                if (activity != null) {
-                    scope.launch { if (!playStore.checkForUpdate(activity)) message(R.string.update_none) }
-                }
+                if (activity != null) scope.launch { if (!playStore.checkForUpdate(activity)) message(R.string.update_none) }
             }
             Item(Icons.Rounded.Info, stringResource(R.string.settings_about), null, onClick = onOpenAbout)
         }
@@ -326,6 +265,7 @@ fun SettingsScreen(
             message(R.string.lock_pin_set)
         }
     }
+    if (donateDialog) DonateDialog(onDismiss = { donateDialog = false })
     if (notifRationale) {
         ConfirmDialog(
             title = stringResource(R.string.permission_notifications_title),
@@ -348,13 +288,13 @@ fun SettingsScreen(
             onDismiss = { notifDenied = false },
         )
     }
-    revokeSource?.let { source ->
+    if (revokeDialog) {
         ConfirmDialog(
             title = stringResource(R.string.folder_access_revoke),
-            text = stringResource(R.string.folder_access_revoke_body, source.displayName),
+            text = stringResource(R.string.folder_access_revoke_body),
             confirmLabel = stringResource(R.string.folder_access_revoke),
-            onConfirm = { viewModel.revokeAccess(source) },
-            onDismiss = { revokeSource = null },
+            onConfirm = viewModel::revokeAccess,
+            onDismiss = { revokeDialog = false },
         )
     }
 }
@@ -389,7 +329,13 @@ private fun Item(icon: ImageVector, title: String, subtitle: String?, onClick: (
 }
 
 @Composable
-private fun SwitchItem(icon: ImageVector, title: String, subtitle: String?, checked: Boolean, onChange: (Boolean) -> Unit) {
+private fun SwitchItem(
+    icon: ImageVector,
+    title: String,
+    checked: Boolean,
+    subtitle: String? = null,
+    onChange: (Boolean) -> Unit,
+) {
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = subtitle?.let { { Text(it) } },

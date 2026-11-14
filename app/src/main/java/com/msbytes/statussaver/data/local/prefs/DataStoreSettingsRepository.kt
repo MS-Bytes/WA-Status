@@ -12,7 +12,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.msbytes.statussaver.domain.model.AppSettings
 import com.msbytes.statussaver.domain.model.SortOrder
-import com.msbytes.statussaver.domain.model.StatusSource
 import com.msbytes.statussaver.domain.model.ThemeMode
 import com.msbytes.statussaver.domain.repository.SettingsRepository
 import com.msbytes.statussaver.security.PinHasher
@@ -42,16 +41,16 @@ class DataStoreSettingsRepository @Inject constructor(
         val THEME = stringPreferencesKey("theme_mode")
         val DYNAMIC = booleanPreferencesKey("dynamic_color")
         val ONBOARDING = booleanPreferencesKey("onboarding_done")
-        val AUTO_WA = booleanPreferencesKey("auto_save_whatsapp")
-        val AUTO_BIZ = booleanPreferencesKey("auto_save_business")
+        val AUTO_SAVE = booleanPreferencesKey("auto_save")
+        val NOTIF_PROMPT = booleanPreferencesKey("notification_prompt_shown")
         val NOTIFY = booleanPreferencesKey("notify_new")
         val BIOMETRIC = booleanPreferencesKey("biometric")
         val SORT = stringPreferencesKey("sort_order")
         val AD_FREE_UNTIL = longPreferencesKey("ad_free_until")
         val SAVE_COUNT = intPreferencesKey("save_count")
         val WIDGET_COUNT = intPreferencesKey("widget_new_count")
-        fun lastSeen(source: StatusSource) = longPreferencesKey("last_seen_${source.name}")
-        fun lastNotified(source: StatusSource) = longPreferencesKey("last_notified_${source.name}")
+        val LAST_SEEN = longPreferencesKey("last_seen")
+        val LAST_NOTIFIED = longPreferencesKey("last_notified")
         val PIN_HASH = stringPreferencesKey("pin_hash")
         val PIN_SALT = stringPreferencesKey("pin_salt")
     }
@@ -65,9 +64,9 @@ class DataStoreSettingsRepository @Inject constructor(
                 themeMode = p[Keys.THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.SYSTEM,
                 dynamicColor = p[Keys.DYNAMIC] ?: true,
                 onboardingDone = p[Keys.ONBOARDING] ?: false,
-                autoSaveWhatsApp = p[Keys.AUTO_WA] ?: false,
-                autoSaveBusiness = p[Keys.AUTO_BIZ] ?: false,
-                notifyNewStatuses = p[Keys.NOTIFY] ?: false,
+                autoSave = p[Keys.AUTO_SAVE] ?: false,
+                notifyNewStatuses = p[Keys.NOTIFY] ?: true,
+                notificationPromptShown = p[Keys.NOTIF_PROMPT] ?: false,
                 appLockEnabled = s[Keys.PIN_HASH] != null,
                 biometricEnabled = p[Keys.BIOMETRIC] ?: false,
                 sortOrder = p[Keys.SORT]?.let { runCatching { SortOrder.valueOf(it) }.getOrNull() } ?: SortOrder.NEWEST,
@@ -80,20 +79,19 @@ class DataStoreSettingsRepository @Inject constructor(
     override suspend fun setThemeMode(mode: ThemeMode) = put(Keys.THEME, mode.name)
     override suspend fun setDynamicColor(enabled: Boolean) = put(Keys.DYNAMIC, enabled)
     override suspend fun setOnboardingDone() = put(Keys.ONBOARDING, true)
-    override suspend fun setAutoSave(source: StatusSource, enabled: Boolean) =
-        put(if (source == StatusSource.WHATSAPP) Keys.AUTO_WA else Keys.AUTO_BIZ, enabled)
+    override suspend fun setAutoSave(enabled: Boolean) = put(Keys.AUTO_SAVE, enabled)
+    override suspend fun setNotificationPromptShown() = put(Keys.NOTIF_PROMPT, true)
     override suspend fun setNotifyNewStatuses(enabled: Boolean) = put(Keys.NOTIFY, enabled)
     override suspend fun setSortOrder(order: SortOrder) = put(Keys.SORT, order.name)
     override suspend fun setAdFreeUntil(epochMillis: Long) = put(Keys.AD_FREE_UNTIL, epochMillis)
     override suspend fun setBiometricEnabled(enabled: Boolean) = put(Keys.BIOMETRIC, enabled)
     override suspend fun setWidgetNewCount(count: Int) = put(Keys.WIDGET_COUNT, count)
 
-    override suspend fun lastSeen(source: StatusSource): Long = safeStore.first()[Keys.lastSeen(source)] ?: 0L
-    override suspend fun setLastSeen(source: StatusSource, epochMillis: Long) = put(Keys.lastSeen(source), epochMillis)
+    override suspend fun lastSeen(): Long = safeStore.first()[Keys.LAST_SEEN] ?: 0L
+    override suspend fun setLastSeen(epochMillis: Long) = put(Keys.LAST_SEEN, epochMillis)
 
-    override suspend fun lastNotified(source: StatusSource): Long = safeStore.first()[Keys.lastNotified(source)] ?: 0L
-    override suspend fun setLastNotified(source: StatusSource, epochMillis: Long) =
-        put(Keys.lastNotified(source), epochMillis)
+    override suspend fun lastNotified(): Long = safeStore.first()[Keys.LAST_NOTIFIED] ?: 0L
+    override suspend fun setLastNotified(epochMillis: Long) = put(Keys.LAST_NOTIFIED, epochMillis)
 
     override suspend fun incrementSaveCount(): Int {
         var result = 0

@@ -65,6 +65,7 @@ fun SaveResult.toEvent(mimeType: String): UiEvent = when (this) {
         when (reason) {
             SaveResult.Reason.LOW_STORAGE -> R.string.error_low_storage
             SaveResult.Reason.SOURCE_MISSING -> R.string.error_file_missing
+            SaveResult.Reason.NO_PERMISSION -> R.string.error_storage_permission
             SaveResult.Reason.UNKNOWN -> R.string.save_failed
         },
     )

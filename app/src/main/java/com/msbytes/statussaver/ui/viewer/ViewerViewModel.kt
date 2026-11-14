@@ -8,7 +8,7 @@ import com.msbytes.statussaver.R
 import com.msbytes.statussaver.core.UiEvent
 import com.msbytes.statussaver.data.share.ShareHelper
 import com.msbytes.statussaver.domain.model.StatusItem
-import com.msbytes.statussaver.domain.model.StatusSource
+import com.msbytes.statussaver.domain.model.MediaType
 import com.msbytes.statussaver.domain.repository.FavoritesRepository
 import com.msbytes.statussaver.domain.repository.SavedRepository
 import com.msbytes.statussaver.domain.repository.StatusRepository
@@ -39,19 +39,17 @@ class ViewerViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<ViewerRoute>()
-    private val statusCollection = ViewerCollection.parse(route.collection)
-    val isSavedCollection: Boolean = statusCollection == null
     val startId: String = route.startId
 
     /**
      * Status lists are snapshotted when the viewer opens so a background rescan never
      * shifts the page under the user's finger. Saved items stay live (for deletes).
      */
-    val items: StateFlow<List<StatusItem>> = if (statusCollection == null) {
+    val items: StateFlow<List<StatusItem>> = if (route.collection == ViewerCollection.SAVED) {
         savedRepository.saved
     } else {
-        val (source, type) = statusCollection
-        MutableStateFlow(statusRepository.statuses.value[source].orEmpty().filter { it.type == type }).asStateFlow()
+        val type = if (route.collection == ViewerCollection.VIDEOS) MediaType.VIDEO else MediaType.IMAGE
+        MutableStateFlow(statusRepository.statuses.value.orEmpty().filter { it.type == type }).asStateFlow()
     }
 
     val favoriteIds: StateFlow<Set<String>> =
@@ -83,12 +81,12 @@ class ViewerViewModel @Inject constructor(
 
     fun share(item: StatusItem) = launchShare(item, null)
 
-    fun repost(item: StatusItem, target: StatusSource) {
-        if (!statusRepository.isAppInstalled(target)) {
-            _events.trySend(UiEvent.Message(R.string.repost_not_installed))
-            return
+    /** Repost to WhatsApp / WhatsApp Business (whichever is installed). */
+    fun repost(item: StatusItem, chooserTitle: String) {
+        viewModelScope.launch {
+            val intent = shareHelper.buildRepostIntent(item, statusRepository.installedApps(), chooserTitle)
+            _events.send(intent?.let { UiEvent.LaunchIntent(it) } ?: UiEvent.Message(R.string.not_installed_title))
         }
-        launchShare(item, target.packageName)
     }
 
     fun toggleFavorite(item: StatusItem) {

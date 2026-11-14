@@ -5,21 +5,21 @@ import com.msbytes.statussaver.domain.model.StatusItem
 import com.msbytes.statussaver.domain.model.StatusSource
 import kotlinx.coroutines.flow.StateFlow
 
-/** Reads cached statuses from the messenger folders the user granted access to. */
+/** Reads cached statuses of WhatsApp and WhatsApp Business together. */
 interface StatusRepository {
-    /** Latest scan per source, newest first. */
-    val statuses: StateFlow<Map<StatusSource, List<StatusItem>>>
+    /** Latest scan, newest first. Null until the first successful scan. */
+    val statuses: StateFlow<List<StatusItem>?>
 
-    fun isAppInstalled(source: StatusSource): Boolean
-    fun hasAccess(source: StatusSource): Boolean
+    fun installedApps(): List<StatusSource>
+    fun hasAccess(): Boolean
 
-    /** Uri passed as EXTRA_INITIAL_URI so the picker opens directly in the .Statuses folder. */
-    fun initialFolderUri(source: StatusSource): Uri
+    /** Where the folder picker opens (Android/media, which covers both apps). */
+    fun initialFolderUri(): Uri
 
-    /** Validates and persists a tree uri picked by the user. Returns false for a wrong folder. */
-    fun grantAccess(source: StatusSource, treeUri: Uri): Boolean
-    fun revokeAccess(source: StatusSource)
+    /** Validates and persists a picked folder. Returns false for an unrelated folder. */
+    fun grantAccess(treeUri: Uri): Boolean
+    fun revokeAccess()
 
-    /** Rescans the folder. Fails with [com.msbytes.statussaver.domain.model.StatusAccessException]. */
-    suspend fun refresh(source: StatusSource): Result<List<StatusItem>>
+    /** Rescans all folders. Fails with [com.msbytes.statussaver.domain.model.StatusAccessException]. */
+    suspend fun refresh(): Result<List<StatusItem>>
 }

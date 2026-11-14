@@ -5,20 +5,27 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.util.LruCache
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 
 /** Lazily reads video durations / resolutions once and caches them in memory. */
 object MediaPreviewCache {
     private val durations = LruCache<String, Long>(1000)
 
+    /** At most 2 metadata reads at once so fast scrolling never floods the IO pool. */
+    private val permits = Semaphore(2)
+
     suspend fun videoDuration(context: Context, uri: Uri): Long? {
         durations.get(uri.toString())?.let { return it }
-        return withContext(Dispatchers.IO) {
-            runCatching {
+        return permits.withPermit {
+            withContext(Dispatchers.IO) {
+                runCatching {
                 MediaMetadataRetriever().useRetriever(context, uri) {
                     it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull()
                 }
-            }.getOrNull()?.also { durations.put(uri.toString(), it) }
+                }.getOrNull()?.also { durations.put(uri.toString(), it) }
+            }
         }
     }
 

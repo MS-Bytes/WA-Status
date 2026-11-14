@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.msbytes.statussaver.BuildConfig
@@ -47,7 +48,7 @@ fun AboutScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.about_title)) },
+                title = { Text(stringResource(R.string.settings_about)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.cd_back)) }
                 },
@@ -65,13 +66,9 @@ fun AboutScreen(onBack: () -> Unit) {
         ) {
             AppLogo(96.dp)
             Spacer(Modifier.height(16.dp))
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             Text(stringResource(R.string.about_version, BuildConfig.VERSION_NAME), color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(stringResource(R.string.about_developer, stringResource(R.string.developer_name)), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(16.dp))
-            Text(stringResource(R.string.about_description), textAlign = TextAlign.Center)
-            Spacer(Modifier.height(8.dp))
-            Text(stringResource(R.string.works_with), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.height(20.dp))
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                 Column(Modifier.padding(16.dp)) {
@@ -85,7 +82,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 Text(stringResource(R.string.settings_privacy_policy))
             }
             OutlinedButton(
-                onClick = { open(IntentUtils.email(SUPPORT_EMAIL, context.getString(R.string.app_short_name))) },
+                onClick = { open(IntentUtils.email(SUPPORT_EMAIL, context.getString(R.string.app_name))) },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.about_contact)) }
         }

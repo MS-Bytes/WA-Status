@@ -22,13 +22,12 @@ class Notifier @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     fun createChannels() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
         manager.createNotificationChannels(
             listOf(
-                NotificationChannel(CHANNEL_NEW, context.getString(R.string.channel_new_statuses), NotificationManager.IMPORTANCE_DEFAULT)
-                    .apply { description = context.getString(R.string.channel_new_statuses_desc) },
-                NotificationChannel(CHANNEL_AUTO_SAVE, context.getString(R.string.channel_auto_save), NotificationManager.IMPORTANCE_LOW)
-                    .apply { description = context.getString(R.string.channel_auto_save_desc) },
+                NotificationChannel(CHANNEL_NEW, context.getString(R.string.channel_new_statuses), NotificationManager.IMPORTANCE_DEFAULT),
+                NotificationChannel(CHANNEL_AUTO_SAVE, context.getString(R.string.channel_auto_save), NotificationManager.IMPORTANCE_LOW),
             ),
         )
     }

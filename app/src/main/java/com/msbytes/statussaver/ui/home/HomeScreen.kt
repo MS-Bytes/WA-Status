@@ -1,9 +1,11 @@
 package com.msbytes.statussaver.ui.home
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Chat
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Close
@@ -21,6 +22,9 @@ import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -30,9 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -47,7 +48,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.core.content.ContextCompat
+import com.msbytes.statussaver.ui.components.AppLogo
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -84,7 +89,6 @@ private const val RESCAN_INTERVAL_MS = 10_000L
 fun HomeScreen(
     onOpenViewer: (collection: String, startId: String) -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenDirectChat: () -> Unit,
     onOpenFaq: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
     savedViewModel: SavedViewModel = hiltViewModel(),
@@ -107,6 +111,28 @@ fun HomeScreen(
 
     val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
         viewModel.onFolderPicked(it)
+    }
+    // Android 7–9 only: saving to the gallery needs the classic storage permission.
+    val storagePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        savedViewModel.refresh()
+    }
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ) {
+            storagePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+    }
+    // Android 13+: ask once for notification permission after access is granted (new status alerts).
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        viewModel.onNotificationPromptHandled(granted)
+    }
+    var showNotificationPrompt by remember { mutableStateOf(false) }
+    LaunchedEffect(state.askNotifications) {
+        if (!state.askNotifications) return@LaunchedEffect
+        val needed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        if (needed) showNotificationPrompt = true else viewModel.onNotificationPromptHandled(true)
     }
 
     // Lifecycle: refresh on resume, mark as seen on stop, light periodic rescan while visible.
@@ -171,7 +197,6 @@ fun HomeScreen(
                 HomeTopBar(
                     sortOrder = state.sortOrder,
                     onSort = viewModel::setSortOrder,
-                    onDirectChat = onOpenDirectChat,
                     onSettings = onOpenSettings,
                     onHelp = onOpenFaq,
                 )
@@ -203,19 +228,12 @@ fun HomeScreen(
                     )
                 }
             }
-            AnimatedVisibility(visible = page != PAGE_SAVED) {
-                SourceSwitcher(
-                    selected = state.source,
-                    onSelect = viewModel::selectSource,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                )
-            }
             HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize(), beyondViewportPageCount = 1) { index ->
                 val onItemClick: (StatusItem) -> Unit = { item ->
                     if (state.selection.isNotEmpty()) {
                         viewModel.toggleSelection(item)
                     } else {
-                        onOpenViewer(ViewerCollection.of(state.source, item.type), item.id)
+                        onOpenViewer(if (item.isVideo) ViewerCollection.VIDEOS else ViewerCollection.IMAGES, item.id)
                     }
                 }
                 when (index) {
@@ -225,12 +243,12 @@ fun HomeScreen(
                         nativeAds = if (adsEnabled) nativeAds else emptyList(),
                         onGrantAccess = { folderPicker.launch(viewModel.initialFolderUri()) },
                         onRefresh = { viewModel.refresh() },
-                        onInstall = { source ->
+                        onInstall = {
                             adManager?.suppressNextAppOpen()
-                            runCatching { context.startActivity(IntentUtils.playStoreApp(source.packageName)) }
+                            runCatching { context.startActivity(IntentUtils.playStoreApp(StatusSource.WHATSAPP.packageName)) }
                         },
-                        onOpenMessenger = { source ->
-                            IntentUtils.launchApp(context, source.packageName)?.let {
+                        onOpenMessenger = {
+                            StatusSource.entries.firstNotNullOfOrNull { IntentUtils.launchApp(context, it.packageName) }?.let {
                                 adManager?.suppressNextAppOpen()
                                 runCatching { context.startActivity(it) }
                             }
@@ -258,6 +276,29 @@ fun HomeScreen(
         }
     }
 
+    if (showNotificationPrompt) {
+        AlertDialog(
+            onDismissRequest = {},
+            icon = { Icon(Icons.Rounded.NotificationsActive, null) },
+            title = { Text(stringResource(R.string.permission_notifications_title)) },
+            text = { Text(stringResource(R.string.permission_notifications_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showNotificationPrompt = false
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }) { Text(stringResource(R.string.action_allow)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showNotificationPrompt = false
+                    viewModel.onNotificationPromptHandled(false)
+                }) { Text(stringResource(R.string.action_not_now)) }
+            },
+        )
+    }
+
     if (confirmDelete) {
         val count = savedState.selection.size
         ConfirmDialog(
@@ -274,26 +315,23 @@ fun HomeScreen(
 private fun HomeTopBar(
     sortOrder: SortOrder,
     onSort: (SortOrder) -> Unit,
-    onDirectChat: () -> Unit,
     onSettings: () -> Unit,
     onHelp: () -> Unit,
 ) {
     var sortMenu by rememberSaveable { mutableStateOf(false) }
     TopAppBar(
         title = {
-            Column {
-                Text(stringResource(R.string.app_short_name), style = MaterialTheme.typography.titleLarge)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AppLogo(32.dp)
                 Text(
-                    stringResource(R.string.works_with),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 10.dp),
                 )
             }
         },
         actions = {
-            IconButton(onClick = onDirectChat) {
-                Icon(Icons.AutoMirrored.Rounded.Chat, stringResource(R.string.menu_direct_chat))
-            }
             IconButton(onClick = { sortMenu = true }) {
                 Icon(Icons.AutoMirrored.Rounded.Sort, stringResource(R.string.action_sort))
             }
@@ -318,28 +356,13 @@ private fun HomeTopBar(
                 }
             }
             IconButton(onClick = onHelp) {
-                Icon(Icons.AutoMirrored.Rounded.HelpOutline, stringResource(R.string.menu_how_to_use))
+                Icon(Icons.AutoMirrored.Rounded.HelpOutline, stringResource(R.string.menu_faq))
             }
             IconButton(onClick = onSettings) {
                 Icon(Icons.Rounded.Settings, stringResource(R.string.cd_settings))
             }
         },
     )
-}
-
-@Composable
-private fun SourceSwitcher(selected: StatusSource, onSelect: (StatusSource) -> Unit, modifier: Modifier = Modifier) {
-    SingleChoiceSegmentedButtonRow(modifier.fillMaxWidth()) {
-        StatusSource.entries.forEachIndexed { index, source ->
-            SegmentedButton(
-                selected = selected == source,
-                onClick = { onSelect(source) },
-                shape = SegmentedButtonDefaults.itemShape(index, StatusSource.entries.size),
-            ) {
-                Text(stringResource(if (source == StatusSource.WHATSAPP) R.string.source_whatsapp else R.string.source_business))
-            }
-        }
-    }
 }
 
 @Composable

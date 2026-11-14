@@ -7,5 +7,5 @@ sealed interface SaveResult {
     data class AlreadySaved(val uri: Uri) : SaveResult
     data class Failed(val reason: Reason) : SaveResult
 
-    enum class Reason { LOW_STORAGE, SOURCE_MISSING, UNKNOWN }
+    enum class Reason { LOW_STORAGE, SOURCE_MISSING, NO_PERMISSION, UNKNOWN }
 }

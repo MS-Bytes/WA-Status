@@ -31,7 +31,7 @@ fun InfoSheet(item: StatusItem, onDismiss: () -> Unit) {
     val duration by produceState<Long?>(null, item.uri) {
         if (item.isVideo) value = MediaPreviewCache.videoDuration(context, item.uri)
     }
-    val location = item.source?.let { "${it.displayName} › .Statuses" } ?: MediaStoreSaver.relativePath(item.type)
+    val location = item.source?.displayName ?: MediaStoreSaver.relativePath(item.type)
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 24.dp).navigationBarsPadding()) {

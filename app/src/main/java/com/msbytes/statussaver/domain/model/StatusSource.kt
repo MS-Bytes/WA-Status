@@ -1,8 +1,8 @@
 package com.msbytes.statussaver.domain.model
 
 /**
- * The two supported messenger apps and the location of their cached status folders
- * (relative to the root of primary shared storage).
+ * Supported messenger apps and their cached status folders (relative to the storage root).
+ * WAVAULT scans all of them together — the user never has to pick an app.
  */
 enum class StatusSource(
     val packageName: String,
@@ -14,7 +14,7 @@ enum class StatusSource(
         displayName = "WhatsApp",
         folderPaths = listOf(
             "Android/media/com.whatsapp/WhatsApp/Media/.Statuses",
-            "WhatsApp/Media/.Statuses", // legacy location (older WhatsApp builds on Android 10)
+            "WhatsApp/Media/.Statuses", // legacy location (old WhatsApp builds)
         ),
     ),
     BUSINESS(

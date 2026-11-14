@@ -58,7 +58,6 @@ fun LockScreen(onExit: () -> Unit, viewModel: LockViewModel = hiltViewModel()) {
             .canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS
     }
     val title = stringResource(R.string.lock_biometric_title)
-    val subtitle = stringResource(R.string.lock_biometric_subtitle)
     val negative = stringResource(R.string.lock_enter_pin)
     fun showBiometric() {
         val host = activity ?: return
@@ -73,7 +72,6 @@ fun LockScreen(onExit: () -> Unit, viewModel: LockViewModel = hiltViewModel()) {
         )
         val info = BiometricPrompt.PromptInfo.Builder()
             .setTitle(title)
-            .setSubtitle(subtitle)
             .setNegativeButtonText(negative)
             .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
             .build()

@@ -3,15 +3,14 @@ package com.msbytes.statussaver.ui.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.msbytes.statussaver.ads.AdManager
 import com.msbytes.statussaver.ads.ConsentManager
 import com.msbytes.statussaver.domain.model.AppSettings
 import com.msbytes.statussaver.domain.model.MediaType
-import com.msbytes.statussaver.domain.model.StatusSource
 import com.msbytes.statussaver.domain.model.ThemeMode
 import com.msbytes.statussaver.domain.repository.SavedRepository
 import com.msbytes.statussaver.domain.repository.SettingsRepository
 import com.msbytes.statussaver.domain.repository.StatusRepository
+import com.msbytes.statussaver.play.PlayStoreHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,8 +28,8 @@ class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val statusRepository: StatusRepository,
     savedRepository: SavedRepository,
-    val adManager: AdManager,
     val consentManager: ConsentManager,
+    val playStoreHelper: PlayStoreHelper,
 ) : ViewModel() {
 
     val settings: StateFlow<AppSettings> =
@@ -40,32 +39,27 @@ class SettingsViewModel @Inject constructor(
         StorageSummary(list.sumOf { it.size }, list.count { it.type == MediaType.IMAGE }, list.count { it.type == MediaType.VIDEO })
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StorageSummary())
 
-    private val _access = MutableStateFlow(emptyMap<StatusSource, Boolean>())
-    val access: StateFlow<Map<StatusSource, Boolean>> = _access.asStateFlow()
+    private val _hasAccess = MutableStateFlow(statusRepository.hasAccess())
+    val hasAccess: StateFlow<Boolean> = _hasAccess.asStateFlow()
 
     init {
         viewModelScope.launch { savedRepository.refresh() }
-        refreshAccess()
     }
 
-    fun refreshAccess() {
-        _access.value = StatusSource.entries.associateWith { statusRepository.hasAccess(it) }
-    }
+    fun initialFolderUri(): Uri = statusRepository.initialFolderUri()
 
-    fun initialFolderUri(source: StatusSource): Uri = statusRepository.initialFolderUri(source)
+    /** Returns false when an unrelated folder was picked. */
+    fun grantAccess(uri: Uri): Boolean =
+        statusRepository.grantAccess(uri).also { _hasAccess.value = statusRepository.hasAccess() }
 
-    /** Returns false when the wrong folder was picked. */
-    fun grantAccess(source: StatusSource, uri: Uri): Boolean =
-        statusRepository.grantAccess(source, uri).also { refreshAccess() }
-
-    fun revokeAccess(source: StatusSource) {
-        statusRepository.revokeAccess(source)
-        refreshAccess()
+    fun revokeAccess() {
+        statusRepository.revokeAccess()
+        _hasAccess.value = statusRepository.hasAccess()
     }
 
     fun setTheme(mode: ThemeMode) = launch { settingsRepository.setThemeMode(mode) }
     fun setDynamicColor(enabled: Boolean) = launch { settingsRepository.setDynamicColor(enabled) }
-    fun setAutoSave(source: StatusSource, enabled: Boolean) = launch { settingsRepository.setAutoSave(source, enabled) }
+    fun setAutoSave(enabled: Boolean) = launch { settingsRepository.setAutoSave(enabled) }
     fun setNotifications(enabled: Boolean) = launch { settingsRepository.setNotifyNewStatuses(enabled) }
     fun setPin(pin: String?) = launch { settingsRepository.setPin(pin) }
     fun setBiometric(enabled: Boolean) = launch { settingsRepository.setBiometricEnabled(enabled) }

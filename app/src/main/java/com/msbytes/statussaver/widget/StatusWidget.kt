@@ -53,7 +53,7 @@ class StatusWidget : GlanceAppWidget() {
         } else {
             context.getString(R.string.widget_no_new)
         }
-        val appName = context.getString(R.string.app_short_name)
+        val appName = context.getString(R.string.app_name)
 
         provideContent {
             GlanceTheme {

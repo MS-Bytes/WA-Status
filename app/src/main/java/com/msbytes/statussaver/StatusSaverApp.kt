@@ -6,7 +6,9 @@ import androidx.work.Configuration
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
+import android.os.Build
 import coil3.gif.AnimatedImageDecoder
+import coil3.gif.GifDecoder
 import coil3.request.crossfade
 import coil3.video.VideoFrameDecoder
 import com.msbytes.statussaver.ads.AdManager
@@ -35,7 +37,8 @@ class StatusSaverApp : Application(), Configuration.Provider, SingletonImageLoad
         ImageLoader.Builder(context)
             .components {
                 add(VideoFrameDecoder.Factory())
-                add(AnimatedImageDecoder.Factory())
+                // Android 9+ decodes GIF/animated WebP natively; older versions use Coil's GIF decoder.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) add(AnimatedImageDecoder.Factory()) else add(GifDecoder.Factory())
             }
             .crossfade(true)
             .build()

@@ -72,7 +72,7 @@ android {
 
     defaultConfig {
         applicationId = "com.msbytes.statussaver"
-        minSdk = 29
+        minSdk = 24
         targetSdk = 36
         versionCode = providers.gradleProperty("APP_VERSION_CODE").get().toInt()
         versionName = providers.gradleProperty("APP_VERSION_NAME").get()
@@ -81,6 +81,8 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField("boolean", "ADS_ENABLED", adsEnabled.toString())
+        // Crypto donation entry in Settings (set DONATE_ENABLED=false to hide it, e.g. for Play review).
+        buildConfigField("boolean", "DONATE_ENABLED", (secret("DONATE_ENABLED")?.toBooleanStrictOrNull() ?: true).toString())
         buildConfigField(
             "String",
             "PRIVACY_POLICY_URL",
@@ -95,7 +97,7 @@ android {
                 storePassword = secret("KEYSTORE_PASSWORD")
                 keyAlias = secret("KEY_ALIAS")
                 keyPassword = secret("KEY_PASSWORD")
-                enableV1Signing = false // minSdk 29: v2+ only
+                enableV1Signing = false // minSdk 24: v2+ is supported on all targets
                 enableV2Signing = true
                 enableV3Signing = true
             }

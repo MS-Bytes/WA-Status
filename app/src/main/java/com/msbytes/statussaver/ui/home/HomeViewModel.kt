@@ -12,13 +12,13 @@ import com.msbytes.statussaver.domain.model.SaveResult
 import com.msbytes.statussaver.domain.model.SortOrder
 import com.msbytes.statussaver.domain.model.StatusAccessException
 import com.msbytes.statussaver.domain.model.StatusItem
-import com.msbytes.statussaver.domain.model.StatusSource
 import com.msbytes.statussaver.domain.repository.SavedRepository
 import com.msbytes.statussaver.domain.repository.SettingsRepository
 import com.msbytes.statussaver.domain.repository.StatusRepository
 import com.msbytes.statussaver.ui.common.SaveActions
 import com.msbytes.statussaver.widget.WidgetUpdater
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,7 +43,7 @@ class HomeViewModel @Inject constructor(
 
     private val local = MutableStateFlow(HomeUiState())
     private val loadFailed = MutableStateFlow(false)
-    private val baselines = mutableMapOf<StatusSource, Long>()
+    private var refreshJob: Job? = null
 
     private val _events = Channel<UiEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
@@ -54,58 +54,62 @@ class HomeViewModel @Inject constructor(
         statusRepository.statuses,
         savedRepository.saved,
         settingsRepository.settings,
-    ) { state, failed, statuses, saved, settings ->
-        val items = statuses[state.source]
+    ) { state, failed, items, saved, settings ->
         val content = when {
             failed -> UiState.Error(R.string.error_load_statuses)
             items == null -> UiState.Loading
             items.isEmpty() -> UiState.Empty
             else -> UiState.Success(settings.sortOrder.apply(items))
         }
-        state.copy(content = content, savedNames = saved.mapTo(HashSet()) { it.name }, sortOrder = settings.sortOrder)
+        state.copy(
+            content = content,
+            savedNames = saved.mapTo(HashSet()) { it.name },
+            sortOrder = settings.sortOrder,
+            askNotifications = state.access == AccessState.GRANTED && settings.notifyNewStatuses &&
+                !settings.notificationPromptShown,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     init {
+        // Start loading immediately (fast first paint), before the screen's ON_START.
+        refresh(silent = true)
         viewModelScope.launch { savedRepository.refresh() }
-    }
-
-    fun selectSource(source: StatusSource) {
-        if (source == local.value.source) return
-        local.update { it.copy(source = source, selection = emptySet(), access = AccessState.CHECKING) }
-        loadFailed.value = false
-        viewModelScope.launch { loadBaseline(source) }
-        refresh()
     }
 
     /** Called when the screen comes to the foreground. */
     fun onStart() {
         viewModelScope.launch {
-            baselines.clear()
-            loadBaseline(local.value.source)
+            val lastSeen = settingsRepository.lastSeen()
+            local.update { it.copy(newSince = if (lastSeen == 0L) Long.MAX_VALUE else lastSeen) }
         }
-        refresh()
+        refresh(silent = true)
         viewModelScope.launch { savedRepository.refresh() }
     }
 
     /** Called when the screen goes to the background: everything visible is now "seen". */
     fun onStop() {
         viewModelScope.launch {
-            val now = System.currentTimeMillis()
-            statusRepository.statuses.value.keys.forEach { settingsRepository.setLastSeen(it, now) }
+            val items = statusRepository.statuses.value
+            if (items != null) {
+                settingsRepository.setLastSeen(System.currentTimeMillis())
+                // Statuses seen in the app don't need a background notification later.
+                val newest = items.maxOfOrNull { it.lastModified } ?: 0L
+                if (newest > settingsRepository.lastNotified()) settingsRepository.setLastNotified(newest)
+            }
             widgetUpdater.update()
         }
     }
 
     fun refresh(silent: Boolean = false) {
-        val source = local.value.source
-        viewModelScope.launch {
-            val installed = statusRepository.isAppInstalled(source)
-            val hasAccess = statusRepository.hasAccess(source)
+        if (refreshJob?.isActive == true) return
+        refreshJob = viewModelScope.launch {
+            val installed = statusRepository.installedApps().isNotEmpty()
+            val hasAccess = statusRepository.hasAccess()
             local.update {
                 it.copy(
-                    installed = installed,
+                    messengerInstalled = installed,
                     access = when {
-                        hasAccess -> AccessState.GRANTED
+                        hasAccess -> if (it.access == AccessState.FOLDER_MISSING) it.access else AccessState.GRANTED
                         it.access == AccessState.WRONG_FOLDER || it.access == AccessState.REVOKED -> it.access
                         else -> AccessState.NEEDED
                     },
@@ -113,17 +117,17 @@ class HomeViewModel @Inject constructor(
             }
             if (!hasAccess) return@launch
             if (!silent) local.update { it.copy(isRefreshing = true) }
-            statusRepository.refresh(source)
+            statusRepository.refresh()
                 .onSuccess { items ->
                     loadFailed.value = false
-                    autoSaveIfEnabled(source, items)
+                    local.update { it.copy(access = AccessState.GRANTED) }
+                    autoSaveIfEnabled(items)
                     widgetUpdater.update()
                 }
                 .onFailure { error ->
                     when (error) {
                         is StatusAccessException.NoAccess -> local.update { it.copy(access = AccessState.REVOKED) }
-                        is StatusAccessException.FolderMissing ->
-                            local.update { it.copy(access = AccessState.FOLDER_MISSING) }
+                        is StatusAccessException.FolderMissing -> local.update { it.copy(access = AccessState.FOLDER_MISSING) }
                         else -> loadFailed.value = true
                     }
                 }
@@ -131,17 +135,23 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun initialFolderUri(): Uri = statusRepository.initialFolderUri(local.value.source)
+    fun initialFolderUri(): Uri = statusRepository.initialFolderUri()
 
     fun onFolderPicked(uri: Uri?) {
         if (uri == null) return
-        val source = local.value.source
-        if (statusRepository.grantAccess(source, uri)) {
+        if (statusRepository.grantAccess(uri)) {
             local.update { it.copy(access = AccessState.GRANTED) }
-            _events.trySend(UiEvent.Message(R.string.permission_granted))
+            refreshJob?.cancel()
             refresh()
         } else {
             local.update { it.copy(access = AccessState.WRONG_FOLDER) }
+        }
+    }
+
+    fun onNotificationPromptHandled(granted: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setNotificationPromptShown()
+            if (!granted) settingsRepository.setNotifyNewStatuses(false)
         }
     }
 
@@ -187,25 +197,16 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun currentItems(type: MediaType): List<StatusItem> =
-        statusRepository.statuses.value[local.value.source].orEmpty().filter { it.type == type }
+        statusRepository.statuses.value.orEmpty().filter { it.type == type }
 
     private fun selectedItems(type: MediaType): List<StatusItem> {
         val ids = local.value.selection
         return currentItems(type).filter { it.id in ids }
     }
 
-    // ------------------------------------------------------------ Helpers
-
-    private suspend fun loadBaseline(source: StatusSource) {
-        val baseline = baselines.getOrPut(source) {
-            settingsRepository.lastSeen(source).let { if (it == 0L) Long.MAX_VALUE else it }
-        }
-        if (local.value.source == source) local.update { it.copy(newSince = baseline) }
-    }
-
     /** Auto-save while the app is open (the background worker covers the rest). */
-    private suspend fun autoSaveIfEnabled(source: StatusSource, items: List<StatusItem>) {
-        if (!settingsRepository.settings.first().autoSave(source)) return
+    private suspend fun autoSaveIfEnabled(items: List<StatusItem>) {
+        if (!settingsRepository.settings.first().autoSave) return
         val savedNames = savedRepository.saved.value.mapTo(HashSet()) { it.name }
         var count = 0
         items.filter { it.name !in savedNames }.forEach {

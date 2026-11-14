@@ -14,7 +14,6 @@ import com.msbytes.statussaver.R
 import com.msbytes.statussaver.core.UiState
 import com.msbytes.statussaver.domain.model.MediaType
 import com.msbytes.statussaver.domain.model.StatusItem
-import com.msbytes.statussaver.domain.model.StatusSource
 import com.msbytes.statussaver.ui.components.MediaGrid
 import com.msbytes.statussaver.ui.components.MessageState
 import com.msbytes.statussaver.ui.components.ShimmerGrid
@@ -26,28 +25,26 @@ fun StatusTabContent(
     nativeAds: List<NativeAd>,
     onGrantAccess: () -> Unit,
     onRefresh: () -> Unit,
-    onInstall: (StatusSource) -> Unit,
-    onOpenMessenger: (StatusSource) -> Unit,
+    onInstall: () -> Unit,
+    onOpenMessenger: () -> Unit,
     onItemClick: (StatusItem) -> Unit,
     onItemLongClick: (StatusItem) -> Unit,
     onDownload: (StatusItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val source = state.source
     when {
-        !state.installed && state.access != AccessState.GRANTED -> MessageState(
+        !state.messengerInstalled && state.access != AccessState.GRANTED -> MessageState(
             icon = Icons.Rounded.GetApp,
-            title = stringResource(R.string.not_installed_title, source.displayName),
-            body = stringResource(R.string.not_installed_body, source.displayName),
+            title = stringResource(R.string.not_installed_title),
+            body = stringResource(R.string.not_installed_body),
             actionLabel = stringResource(R.string.action_install),
-            onAction = { onInstall(source) },
+            onAction = onInstall,
             modifier = modifier,
         )
 
         state.access == AccessState.CHECKING -> ShimmerGrid(modifier)
 
         state.access != AccessState.GRANTED -> PermissionContent(
-            source = source,
             access = state.access,
             onGrant = onGrantAccess,
             modifier = modifier,
@@ -72,10 +69,8 @@ fun StatusTabContent(
                                 if (type == MediaType.IMAGE) R.string.empty_images_title else R.string.empty_videos_title,
                             ),
                             body = stringResource(R.string.empty_statuses_body),
-                            actionLabel = stringResource(
-                                if (source == StatusSource.WHATSAPP) R.string.open_whatsapp else R.string.open_whatsapp_business,
-                            ),
-                            onAction = { onOpenMessenger(source) },
+                            actionLabel = stringResource(R.string.open_whatsapp),
+                            onAction = onOpenMessenger,
                         )
                     } else {
                         MediaGrid(

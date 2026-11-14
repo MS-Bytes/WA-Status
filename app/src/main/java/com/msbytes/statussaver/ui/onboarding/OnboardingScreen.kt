@@ -25,7 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoFixHigh
 import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.FolderOpen
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -51,9 +52,9 @@ private data class Page(val icon: ImageVector, val title: Int, val body: Int)
 
 private val pages = listOf(
     Page(Icons.Rounded.Download, R.string.onboarding_1_title, R.string.onboarding_1_body),
-    Page(Icons.Rounded.AutoFixHigh, R.string.onboarding_2_title, R.string.onboarding_2_body),
-    Page(Icons.Rounded.Shield, R.string.onboarding_3_title, R.string.onboarding_3_body),
-    Page(Icons.Rounded.FolderOpen, R.string.onboarding_4_title, R.string.onboarding_4_body),
+    Page(Icons.Rounded.NotificationsActive, R.string.onboarding_2_title, R.string.onboarding_2_body),
+    Page(Icons.Rounded.AutoFixHigh, R.string.onboarding_3_title, R.string.onboarding_3_body),
+    Page(Icons.Rounded.Shield, R.string.onboarding_4_title, R.string.onboarding_4_body),
 )
 
 /** 4-page intro. No ads are ever shown here. */
@@ -67,8 +68,9 @@ fun OnboardingScreen(onFinish: () -> Unit, onOpenPrivacyPolicy: () -> Unit) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             AppLogo(40.dp)
             Text(
-                stringResource(R.string.app_short_name),
-                style = MaterialTheme.typography.titleMedium,
+                stringResource(R.string.app_name),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 12.dp).weight(1f),
             )
             if (!isLast) TextButton(onClick = onFinish) { Text(stringResource(R.string.action_skip)) }
@@ -103,12 +105,6 @@ fun OnboardingScreen(onFinish: () -> Unit, onOpenPrivacyPolicy: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.widthIn(max = 480.dp),
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    stringResource(R.string.works_with),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
                 )
             }
         }

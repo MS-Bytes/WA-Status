@@ -62,7 +62,6 @@ import coil3.compose.AsyncImage
 import com.msbytes.statussaver.R
 import com.msbytes.statussaver.ads.BannerAd
 import com.msbytes.statussaver.domain.model.StatusItem
-import com.msbytes.statussaver.domain.model.StatusSource
 import com.msbytes.statussaver.ui.common.AppSnackbarHost
 import com.msbytes.statussaver.ui.common.HandleUiEvents
 import com.msbytes.statussaver.ui.components.ConfirmDialog
@@ -122,6 +121,7 @@ fun ViewerScreen(
     var showInfo by remember { mutableStateOf<StatusItem?>(null) }
     var confirmDelete by remember { mutableStateOf<StatusItem?>(null) }
     var menuOpen by remember { mutableStateOf(false) }
+    val repostTitle = stringResource(R.string.repost_chooser_title)
 
     Scaffold(
         containerColor = Color.Black,
@@ -179,14 +179,9 @@ fun ViewerScreen(
                         }
                         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.repost_to_whatsapp)) },
+                                text = { Text(stringResource(R.string.action_repost)) },
                                 leadingIcon = { Icon(Icons.AutoMirrored.Rounded.Reply, null) },
-                                onClick = { menuOpen = false; viewModel.repost(current, StatusSource.WHATSAPP) },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.repost_to_business)) },
-                                leadingIcon = { Icon(Icons.AutoMirrored.Rounded.Reply, null) },
-                                onClick = { menuOpen = false; viewModel.repost(current, StatusSource.BUSINESS) },
+                                onClick = { menuOpen = false; viewModel.repost(current, repostTitle) },
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_edit)) },

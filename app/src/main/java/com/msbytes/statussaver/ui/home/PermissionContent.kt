@@ -33,21 +33,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.msbytes.statussaver.R
-import com.msbytes.statussaver.domain.model.StatusSource
 
-/** Guided folder-permission screen shown in place of the grid (no ads here). */
+/** Guided one-time folder access screen (no ads here). */
 @Composable
-fun PermissionContent(
-    source: StatusSource,
-    access: AccessState,
-    onGrant: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun PermissionContent(access: AccessState, onGrant: () -> Unit, modifier: Modifier = Modifier) {
     var showWhy by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier
@@ -57,45 +50,39 @@ fun PermissionContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            Modifier
-                .size(120.dp)
-                .background(
-                    Brush.linearGradient(
-                        listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)),
-                    ),
-                    CircleShape,
-                ),
+            Modifier.size(104.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Rounded.FolderOpen, stringResource(R.string.cd_illustration), Modifier.size(56.dp), tint = MaterialTheme.colorScheme.primary)
+            Icon(Icons.Rounded.FolderOpen, stringResource(R.string.cd_illustration), Modifier.size(52.dp), tint = MaterialTheme.colorScheme.primary)
         }
         Spacer(Modifier.height(20.dp))
         Text(stringResource(R.string.permission_title), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
         Text(
-            stringResource(R.string.permission_body, stringResource(R.string.app_short_name), source.displayName),
+            stringResource(R.string.permission_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(max = 420.dp),
         )
 
         val error = when (access) {
-            AccessState.WRONG_FOLDER -> stringResource(R.string.permission_wrong_folder_title) to
-                stringResource(R.string.permission_wrong_folder_body)
-            AccessState.REVOKED -> stringResource(R.string.permission_revoked_title) to
-                stringResource(R.string.permission_revoked_body, source.displayName)
-            AccessState.FOLDER_MISSING -> stringResource(R.string.error_title) to
-                stringResource(R.string.permission_folder_missing, source.displayName)
+            AccessState.WRONG_FOLDER -> R.string.permission_wrong_folder_title to R.string.permission_wrong_folder_body
+            AccessState.REVOKED -> R.string.permission_revoked_title to R.string.permission_revoked_body
+            AccessState.FOLDER_MISSING -> R.string.permission_folder_missing_title to R.string.permission_folder_missing
             else -> null
         }
         if (error != null) {
             Spacer(Modifier.height(16.dp))
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+            Card(
+                Modifier.fillMaxWidth().widthIn(max = 480.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+            ) {
                 Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Icon(Icons.Rounded.ErrorOutline, null, tint = MaterialTheme.colorScheme.onErrorContainer)
                     Column {
-                        Text(error.first, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onErrorContainer)
-                        Text(error.second, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onErrorContainer)
+                        Text(stringResource(error.first), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onErrorContainer)
+                        Text(stringResource(error.second), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onErrorContainer)
                     }
                 }
             }
@@ -128,10 +115,7 @@ fun PermissionContent(
 @Composable
 private fun Step(number: Int, text: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            Modifier.size(28.dp).background(MaterialTheme.colorScheme.primary, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
+        Box(Modifier.size(28.dp).background(MaterialTheme.colorScheme.primary, CircleShape), contentAlignment = Alignment.Center) {
             Text("$number", color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.labelLarge)
         }
         Spacer(Modifier.size(12.dp))

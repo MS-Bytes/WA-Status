@@ -1,20 +1,17 @@
 package com.msbytes.statussaver.ui.faq
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ExpandLess
@@ -37,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.msbytes.statussaver.R
 
-private val steps = listOf(R.string.howto_step_1, R.string.howto_step_2, R.string.howto_step_3, R.string.howto_step_4)
 private val faqs = listOf(
     R.string.faq_q1 to R.string.faq_a1,
     R.string.faq_q2 to R.string.faq_a2,
@@ -45,6 +41,8 @@ private val faqs = listOf(
     R.string.faq_q4 to R.string.faq_a4,
     R.string.faq_q5 to R.string.faq_a5,
     R.string.faq_q6 to R.string.faq_a6,
+    R.string.faq_q7 to R.string.faq_a7,
+    R.string.faq_q8 to R.string.faq_a8,
 )
 
 @Composable
@@ -61,27 +59,17 @@ fun FaqScreen(onBack: () -> Unit) {
     ) { padding ->
         LazyColumn(
             Modifier.padding(padding).navigationBarsPadding(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+            contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item { Text(stringResource(R.string.menu_how_to_use), style = MaterialTheme.typography.titleMedium) }
-            itemsIndexed(steps) { index, step ->
-                Row(verticalAlignment = Alignment.Top) {
-                    Box(Modifier.size(28.dp).background(MaterialTheme.colorScheme.primary, CircleShape), contentAlignment = Alignment.Center) {
-                        Text("${index + 1}", color = MaterialTheme.colorScheme.onPrimary)
-                    }
-                    Spacer(Modifier.size(12.dp))
-                    Text(stringResource(step), style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-            item { Spacer(Modifier.size(8.dp)); Text(stringResource(R.string.faq_heading), style = MaterialTheme.typography.titleMedium) }
-            itemsIndexed(faqs) { _, (question, answer) -> FaqCard(question, answer) }
+            items(faqs) { (question, answer) -> FaqCard(question, answer) }
             item {
                 Text(
                     stringResource(R.string.disclaimer),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 12.dp),
+                    modifier = Modifier.padding(top = 12.dp).widthIn(max = 640.dp),
                 )
             }
         }
@@ -91,7 +79,7 @@ fun FaqScreen(onBack: () -> Unit) {
 @Composable
 private fun FaqCard(question: Int, answer: Int) {
     var expanded by rememberSaveable { mutableStateOf(false) }
-    Card(Modifier.fillMaxWidth().clickable { expanded = !expanded }) {
+    Card(Modifier.fillMaxWidth().widthIn(max = 640.dp).clickable { expanded = !expanded }) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(question), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))

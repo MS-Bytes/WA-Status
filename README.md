@@ -1,10 +1,10 @@
 <div align="center">
 
-# Status Saver – Story Downloader
+# WAVAULT
 
 **View, save, edit, share and repost photo & video statuses — offline, on-device, no login.**
 
-Works with WhatsApp & WhatsApp Business · Android 10 – 16 · Kotlin · Jetpack Compose · Material 3 · English
+Works with WhatsApp & WhatsApp Business · Android 7.0 – 16 · Kotlin · Jetpack Compose · Material 3 · English
 
 </div>
 
@@ -17,16 +17,15 @@ Works with WhatsApp & WhatsApp Business · Android 10 – 16 · Kotlin · Jetpac
 
 | | |
 |---|---|
-| 📥 **One-tap save** | Original quality, stream-to-stream copy (no re-compression) into `Pictures/StatusSaver` and `Movies/StatusSaver`. |
-| 🔁 **Two apps** | Separate folder access for WhatsApp and WhatsApp Business with a quick switcher. |
+| 📥 **One-tap save** | Original quality, stream-to-stream copy (no re-compression) into `Pictures/WAVAULT` and `Movies/WAVAULT`. |
+| 🔁 **Universal** | One folder grant covers WhatsApp and WhatsApp Business — statuses from both appear together. |
 | 🔄 **Auto refresh** | On resume, on tab switch, pull-to-refresh and a lightweight periodic rescan. New items get a **NEW** badge. |
 | 🖼️ **Viewer** | Swipe between items, pinch-zoom images, Media3 ExoPlayer for videos (seek, mute, loop). |
 | ✂️ **Editor** | Images: crop (free/1:1/4:5/9:16/16:9), rotate, flip, brightness/contrast/saturation, filters, text, draw. Videos: trim and mute. Always writes a new file. |
 | 🔗 **Share & repost** | Share anywhere, or repost directly to WhatsApp / WhatsApp Business. |
 | ☑️ **Multi-select** | Long-press for bulk save / share / delete, select all. |
 | ⭐ **Favorites, sort & filter** | By date, type, size; favorites stored with Room. |
-| 🤖 **Auto-save & alerts** | Optional auto-save per app, and a 15-minute WorkManager check with “X new statuses” notification. |
-| 💬 **Direct chat** | Message any number without saving the contact (country code picker + optional message). |
+| 🤖 **Auto-detect** | Rescans every few seconds while open and every 15 minutes in the background; notifies about new statuses, optional auto-save. |
 | 🔒 **App Lock** | PIN or BiometricPrompt. |
 | 🎨 **Theming** | Light / Dark / System, Material You dynamic color on Android 12+. |
 | 🧩 **Widget** | Glance home-screen widget showing the new-status count. |
@@ -34,7 +33,7 @@ Works with WhatsApp & WhatsApp Business · Android 10 – 16 · Kotlin · Jetpac
 ### Privacy by design
 - No root, no account, no QR / WhatsApp Web.
 - Reads **only** the status files WhatsApp already cached on the device, so opening them here sends no “seen” receipt.
-- Folder access through the **Storage Access Framework** (one folder, user-approved). **No** `MANAGE_EXTERNAL_STORAGE`, **no** `READ_EXTERNAL_STORAGE`, **no** `READ_MEDIA_*`.
+- Folder access through the **Storage Access Framework** (one folder, user-approved). **No** `MANAGE_EXTERNAL_STORAGE` and **no** `READ_MEDIA_*`. `WRITE_EXTERNAL_STORAGE` is requested only on Android 7–9 (`maxSdkVersion 28`).
 - No files are uploaded. No analytics. The only third-party SDK that sends data is Google Mobile Ads (with UMP consent).
 
 ---
@@ -57,7 +56,7 @@ Works with WhatsApp & WhatsApp Business · Android 10 – 16 · Kotlin · Jetpac
 - **Background:** WorkManager (Hilt workers), Glance App Widget
 - **Google Play:** AdMob + UMP consent, In-App Review, In-App Updates
 - **Build:** AGP 8.13, Gradle 8.14 (Kotlin DSL), version catalog, KSP, R8 + resource shrinking, 16 KB page-size compatible
-- **SDK levels:** `minSdk 29` · `targetSdk 36` · `compileSdk 36`
+- **SDK levels:** `minSdk 24` (Android 7.0) · `targetSdk 36` · `compileSdk 36`
 
 ---
 
@@ -85,7 +84,7 @@ WA-Status/
 │       │   ├── work/                 # 15-min status check (auto-save + notifications)
 │       │   ├── notifications/ · widget/ · security/ · play/
 │       │   └── ui/                   # theme, navigation, components, home, saved, viewer,
-│       │                             # editor, settings, about, faq, directchat, applock, onboarding
+│       │                             # editor, settings, about, faq, applock, onboarding
 │       ├── main/res/                 # strings, themes, adaptive icon, native ad layout, xml configs
 │       └── test/                     # JVM unit tests (repository, saver, ad caps, validator)
 ├── docs/
@@ -139,6 +138,7 @@ Bump `APP_VERSION_CODE` and `APP_VERSION_NAME` in **`gradle.properties`** — th
 3. **Debug builds always use Google’s test IDs.** Release builds use your real IDs only when *all* six are present; otherwise they fall back to test IDs and Gradle logs a warning.
 4. The IDs are injected into `BuildConfig` and the manifest placeholder `${admobAppId}` — they are never committed.
 5. Set `ADS_ENABLED=false` to build a completely ad-free binary (global kill-switch).
+7. Set `DONATE_ENABLED=false` to hide the crypto donation entry (see Play policy note in `docs/PLAY_STORE.md`).
 6. Set up GDPR / US-state messages in **AdMob → Privacy & messaging** so the UMP consent form can be shown.
 
 ### app-ads.txt

@@ -1,10 +1,10 @@
 package com.msbytes.statussaver.domain.model
 
-/** Thrown when a status folder cannot be read. */
+/** Thrown when the status folders cannot be read. */
 sealed class StatusAccessException(message: String) : Exception(message) {
     /** No folder permission, or the user revoked it in system settings. */
     class NoAccess : StatusAccessException("No access to the status folder")
 
-    /** Permission exists but the folder is gone (e.g. WhatsApp reinstalled / cleared). */
+    /** Access exists but no .Statuses folder was found (WhatsApp never opened / reinstalled). */
     class FolderMissing : StatusAccessException("Status folder not found")
 }

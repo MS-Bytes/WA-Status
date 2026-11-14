@@ -2,6 +2,8 @@ package com.msbytes.statussaver.ui.editor
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Build
 import android.graphics.Canvas
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.ImageDecoder
@@ -22,6 +24,7 @@ object ImageRenderer {
     private const val MAX_DIMENSION = 2560
 
     fun decode(context: Context, uri: Uri): Bitmap {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return decodeLegacy(context, uri)
         val source = ImageDecoder.createSource(context.contentResolver, uri)
         return ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE // needed for Canvas drawing
@@ -32,6 +35,17 @@ object ImageRenderer {
                 decoder.setTargetSize((info.size.width * scale).roundToInt(), (info.size.height * scale).roundToInt())
             }
         }
+    }
+
+    /** Android 7–8: BitmapFactory with power-of-two downsampling. */
+    private fun decodeLegacy(context: Context, uri: Uri): Bitmap {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
+        var sample = 1
+        while (max(bounds.outWidth, bounds.outHeight) / sample > MAX_DIMENSION) sample *= 2
+        val options = BitmapFactory.Options().apply { inSampleSize = sample }
+        return context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
+            ?: error("Cannot decode image")
     }
 
     fun transform(source: Bitmap, rotation: Int, flipH: Boolean, flipV: Boolean): Bitmap {

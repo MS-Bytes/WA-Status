@@ -2,7 +2,6 @@ package com.msbytes.statussaver.widget
 
 import android.content.Context
 import androidx.glance.appwidget.updateAll
-import com.msbytes.statussaver.domain.model.StatusSource
 import com.msbytes.statussaver.domain.repository.SettingsRepository
 import com.msbytes.statussaver.domain.repository.StatusRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,12 +16,8 @@ class WidgetUpdater @Inject constructor(
     private val settings: SettingsRepository,
 ) {
     suspend fun update() {
-        val cached = statusRepository.statuses.value
-        var count = 0
-        for (source in StatusSource.entries) {
-            val lastSeen = settings.lastSeen(source)
-            count += cached[source].orEmpty().count { it.lastModified > lastSeen }
-        }
+        val lastSeen = settings.lastSeen()
+        val count = statusRepository.statuses.value.orEmpty().count { it.lastModified > lastSeen }
         settings.setWidgetNewCount(count)
         runCatching { StatusWidget().updateAll(context) }
     }

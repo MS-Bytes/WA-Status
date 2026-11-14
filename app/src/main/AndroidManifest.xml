@@ -5,8 +5,8 @@
     <!-- ===================================================================
          Permissions
          - Status folders are read through the Storage Access Framework
-           (user-granted tree URI) → no storage permission needed.
-         - Saving uses MediaStore (app-owned files) → no storage permission needed.
+           (user-granted folder) → no read permission needed.
+         - Saving uses MediaStore. Only Android 7–9 need WRITE_EXTERNAL_STORAGE.
          =================================================================== -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -17,15 +17,16 @@
     <!-- Optional App Lock with fingerprint / face. -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
-    <!-- Make sure no library silently adds broad storage access (Play policy). -->
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage"
-        tools:node="remove" />
+    <!-- Android 7–9 only: save to Pictures/Movies. Not requested on Android 10+. -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage"
-        tools:node="remove" />
+        android:maxSdkVersion="28"
+        tools:ignore="ScopedStorage" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"
+        tools:ignore="ScopedStorage" />
+    <!-- Make sure no library adds all-files access (Play policy). -->
     <uses-permission
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage"

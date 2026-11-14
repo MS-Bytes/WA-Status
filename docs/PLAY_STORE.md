@@ -1,6 +1,6 @@
 # Google Play release kit
 
-Everything needed to publish **Status Saver – Story Downloader** (`com.msbytes.statussaver`).
+Everything needed to publish **WAVAULT** (`com.msbytes.statussaver`).
 
 ---
 
@@ -26,7 +26,7 @@ stored uncompressed and page-aligned (16 KB page size compatible).
 
 ## 2. Store listing
 
-**App name (30):** `Status Saver – Story Downloader`
+**App name (30):** `WAVAULT – Status Saver`
 
 **Short description (80):**
 `Save, edit & repost photo and video statuses. Fast, private, no login needed.`
@@ -34,10 +34,10 @@ stored uncompressed and page-aligned (16 KB page size compatible).
 **Full description:**
 
 ```
-Status Saver – Story Downloader lets you view, save, edit and share photo and video statuses that are already on your phone. Works with WhatsApp and WhatsApp Business.
+WAVAULT lets you view, save, edit and share photo and video statuses that are already on your phone. Works with WhatsApp and WhatsApp Business together – no switching.
 
 ★ ONE-TAP SAVE
-Download any image or video status in its original quality. Saved files appear instantly in your gallery (Pictures/StatusSaver and Movies/StatusSaver).
+Download any image or video status in its original quality. Saved files appear instantly in your gallery (Pictures/WAVAULT and Movies/WAVAULT).
 
 ★ PRIVATE BY DESIGN
 • No login, no account, no QR code scanning
@@ -57,19 +57,18 @@ Your original file is never changed – edits are saved as a new copy.
 Share statuses to any app or repost them directly to WhatsApp or WhatsApp Business.
 
 ★ SMART FEATURES
-• Auto-refresh with “NEW” badges
-• Optional auto-save of new statuses
+• Auto-detects new statuses with “NEW” badges
 • New-status notifications and home-screen widget
+• Optional auto-save of new statuses
 • Multi-select: save, share or delete many files at once
 • Favorites, sorting and filters
-• Direct Chat: message any number without saving it as a contact
 • App Lock with PIN or fingerprint
 • Light, dark and Material You themes
-• Works on phones, tablets and foldables
+• Works on Android 7.0 to 16, phones, tablets and foldables
 
 HOW TO USE
 1. Open WhatsApp and view the Updates tab so statuses are downloaded.
-2. Open Status Saver and allow access to the status folder (one time).
+2. Open WAVAULT and allow folder access once.
 3. Tap the download button on any status.
 
 DISCLAIMER
@@ -90,8 +89,7 @@ This app is not affiliated with, endorsed or sponsored by WhatsApp LLC or Meta. 
   3. “Edit before you repost” – Image editor with filters/text
   4. “Trim videos in seconds” – Video editor
   5. “All your downloads in one place” – Saved tab
-  6. “Chat without saving contacts” – Direct Chat
-  7. “Private. Offline. Secure.” – App Lock / settings
+  6. “Private. Offline. Secure.” – App Lock / settings
 - Tablet screenshots (optional): same scenes on a 7" and 10" layout.
 
 Never show the WhatsApp logo, real people’s photos without permission, or text implying an official WhatsApp product.
@@ -158,7 +156,7 @@ onboarding, permission guide, editor or App Lock), rewarded ad → 30 minutes wi
 
 ## 6. Test checklist
 
-Run on: **Android 10, 11, 13, 14, 15, 16** – Pixel (stock) and Samsung (One UI). Include one tablet/foldable and one small phone.
+Run on: **Android 7, 8, 9, 10, 11, 13, 14, 15, 16** – Pixel (stock) and Samsung (One UI). Include one tablet/foldable and one small phone.
 
 **Install & onboarding**
 - [ ] Fresh install → splash → onboarding (no ads, consent form appears in EEA via VPN / debug geography)
@@ -167,17 +165,18 @@ Run on: **Android 10, 11, 13, 14, 15, 16** – Pixel (stock) and Samsung (One UI
 **Folder access**
 - [ ] “Grant access” opens the picker directly in `.Statuses` → “Use this folder” → “Allow”
 - [ ] Choosing a wrong folder shows the error and retry works
-- [ ] WhatsApp Business switch asks for its own folder
+- [ ] One grant of Android/media shows WhatsApp and WhatsApp Business statuses together
+- [ ] Android 7–9: storage permission prompt, saving works
 - [ ] Revoke in Settings → app shows the re-grant screen
 - [ ] WhatsApp not installed → install card
-- [ ] Android 10 with legacy `WhatsApp/Media/.Statuses` path
+- [ ] Old WhatsApp builds with legacy `WhatsApp/Media/.Statuses` path (grant storage root)
 
 **Statuses**
 - [ ] Images/Videos tabs, video duration + play icon, NEW badges after new statuses arrive
 - [ ] Pull-to-refresh, auto rescan, tab switch refresh
 - [ ] 500+ items scroll smoothly
 - [ ] Download → animation → snackbar Open / Share; second tap shows “Already saved”
-- [ ] Files appear in Gallery (Pictures/StatusSaver, Movies/StatusSaver) in original size
+- [ ] Files appear in Gallery (Pictures/WAVAULT, Movies/WAVAULT) in original size
 - [ ] Low storage message (fill device) and missing file message (delete status while viewing)
 
 **Viewer / editor**
@@ -192,7 +191,6 @@ Run on: **Android 10, 11, 13, 14, 15, 16** – Pixel (stock) and Samsung (One UI
 - [ ] Auto-save + notifications (Android 13+ permission flow, “Don’t ask again” → settings)
 - [ ] Widget shows new count and opens the app
 - [ ] App Lock PIN, wrong PIN, lockout, biometrics, 30 s grace period
-- [ ] Direct chat with country picker, invalid number error
 - [ ] Theme light/dark/system, dynamic color (12+), rotation, tablet layout, large fonts, TalkBack labels
 - [ ] Predictive back gesture (Android 14+), edge-to-edge on 15/16
 
@@ -202,3 +200,15 @@ Run on: **Android 10, 11, 13, 14, 15, 16** – Pixel (stock) and Samsung (One UI
 - [ ] Rewarded ad pauses interstitials 30 min
 - [ ] Airplane mode: no crashes, ads silently absent
 - [ ] Ad privacy options entry visible where required
+
+---
+
+## 7. Policy notes for this version
+
+- **Donation (USDT TRC20):** Google Play's Payments policy generally only allows in-app donations through
+  external methods for validated charitable organisations. A crypto tip address for the developer may be rejected.
+  If review flags it, build with `DONATE_ENABLED=false` (local.properties) and resubmit.
+- **App name “WAVAULT”:** the “WA” prefix can be read as a reference to WhatsApp. Keep the icon and screenshots
+  free of WhatsApp branding and keep the non-affiliation disclaimer in the description.
+- **Status detection:** statuses appear as soon as WhatsApp has downloaded them to the phone. The app never
+  contacts WhatsApp servers (that would break WhatsApp's terms and Play policy).

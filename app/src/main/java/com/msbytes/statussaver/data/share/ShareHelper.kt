@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
 import com.msbytes.statussaver.domain.model.StatusItem
+import com.msbytes.statussaver.domain.model.StatusSource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -49,6 +50,19 @@ class ShareHelper @Inject constructor(
             if (targetPackage != null) intent.setPackage(targetPackage)
             intent
         }
+
+    /**
+     * Repost to whichever messenger is installed. With both installed the user picks
+     * between WhatsApp and WhatsApp Business only.
+     */
+    suspend fun buildRepostIntent(item: StatusItem, installed: List<StatusSource>, chooserTitle: String): Intent? {
+        if (installed.isEmpty()) return null
+        val intents = installed.mapNotNull { buildShareIntent(listOf(item), it.packageName) }
+        if (intents.isEmpty()) return null
+        if (intents.size == 1) return intents.first()
+        return Intent.createChooser(intents.first(), chooserTitle)
+            .putExtra(Intent.EXTRA_INITIAL_INTENTS, intents.drop(1).toTypedArray())
+    }
 
     private fun shareableUri(item: StatusItem): Uri? {
         if (item.isSaved) return item.uri

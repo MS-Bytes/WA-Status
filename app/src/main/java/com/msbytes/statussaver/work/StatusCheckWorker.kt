@@ -5,7 +5,6 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.msbytes.statussaver.domain.model.SaveResult
-import com.msbytes.statussaver.domain.model.StatusSource
 import com.msbytes.statussaver.domain.repository.SavedRepository
 import com.msbytes.statussaver.domain.repository.SettingsRepository
 import com.msbytes.statussaver.domain.repository.StatusRepository
@@ -16,8 +15,8 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 
 /**
- * Runs every ~15 minutes when auto-save or new-status alerts are enabled.
- * Only reads the folders the user already granted; nothing leaves the device.
+ * Runs every ~15 minutes: detects status files WhatsApp has downloaded in the background,
+ * notifies the user and optionally auto-saves. Nothing leaves the device.
  */
 @HiltWorker
 class StatusCheckWorker @AssistedInject constructor(
@@ -31,27 +30,22 @@ class StatusCheckWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        if (!statusRepository.hasAccess()) return Result.success()
         val settings = settingsRepository.settings.first()
-        var newCount = 0
+        val items = statusRepository.refresh().getOrNull() ?: return Result.success()
+
         var autoSaved = 0
-
-        for (source in StatusSource.entries) {
-            if (!statusRepository.hasAccess(source)) continue
-            val items = statusRepository.refresh(source).getOrNull() ?: continue
-
-            if (settings.autoSave(source)) {
-                items.forEach { if (savedRepository.save(it) is SaveResult.Saved) autoSaved++ }
-            }
-
-            val lastNotified = settingsRepository.lastNotified(source)
-            val fresh = items.filter { it.lastModified > lastNotified }
-            if (fresh.isNotEmpty()) {
-                newCount += fresh.size
-                settingsRepository.setLastNotified(source, fresh.maxOf { it.lastModified })
-            }
+        if (settings.autoSave) {
+            items.forEach { if (savedRepository.save(it) is SaveResult.Saved) autoSaved++ }
         }
 
-        if (settings.notifyNewStatuses && newCount > 0) notifier.showNewStatuses(newCount)
+        val lastNotified = settingsRepository.lastNotified()
+        val fresh = items.filter { it.lastModified > lastNotified }
+        if (fresh.isNotEmpty()) {
+            settingsRepository.setLastNotified(fresh.maxOf { it.lastModified })
+            // First run only sets the baseline, so the user isn't spammed with old statuses.
+            if (settings.notifyNewStatuses && lastNotified > 0) notifier.showNewStatuses(fresh.size)
+        }
         if (autoSaved > 0) notifier.showAutoSaved(autoSaved)
         widgetUpdater.update()
         return Result.success()

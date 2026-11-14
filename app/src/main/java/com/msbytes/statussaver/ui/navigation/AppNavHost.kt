@@ -19,7 +19,6 @@ import com.msbytes.statussaver.BuildConfig
 import com.msbytes.statussaver.ads.LocalAdManager
 import com.msbytes.statussaver.core.IntentUtils
 import com.msbytes.statussaver.ui.about.AboutScreen
-import com.msbytes.statussaver.ui.directchat.DirectChatScreen
 import com.msbytes.statussaver.ui.editor.ImageEditorScreen
 import com.msbytes.statussaver.ui.editor.VideoEditorScreen
 import com.msbytes.statussaver.ui.faq.FaqScreen
@@ -65,7 +64,6 @@ fun AppNavHost(showOnboarding: Boolean, locked: Boolean, onOnboardingDone: () ->
             HomeScreen(
                 onOpenViewer = { collection, id -> navController.navigate(ViewerRoute(collection, id)) },
                 onOpenSettings = { navController.navigate(SettingsRoute) },
-                onOpenDirectChat = { navController.navigate(DirectChatRoute) },
                 onOpenFaq = { navController.navigate(FaqRoute) },
             )
         }
@@ -92,6 +90,5 @@ fun AppNavHost(showOnboarding: Boolean, locked: Boolean, onOnboardingDone: () ->
         }
         composable<AboutRoute> { AboutScreen(onBack = { navController.popBackStack() }) }
         composable<FaqRoute> { FaqScreen(onBack = { navController.popBackStack() }) }
-        composable<DirectChatRoute> { DirectChatScreen(onBack = { navController.popBackStack() }) }
     }
 }
