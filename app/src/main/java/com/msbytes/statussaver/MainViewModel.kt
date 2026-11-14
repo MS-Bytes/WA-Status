@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.msbytes.statussaver.domain.model.AppSettings
 import com.msbytes.statussaver.domain.repository.SettingsRepository
 import com.msbytes.statussaver.security.AppLockManager
+import com.msbytes.statussaver.work.StatusWatchController
 import com.msbytes.statussaver.work.WorkScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,6 +20,7 @@ class MainViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     appLockManager: AppLockManager,
     workScheduler: WorkScheduler,
+    statusWatchController: StatusWatchController,
 ) : ViewModel() {
 
     /** Null until DataStore has been read (the splash screen stays up until then). */
@@ -26,6 +28,7 @@ class MainViewModel @Inject constructor(
         .onEach {
             appLockManager.onSettingsLoaded(it.appLockEnabled)
             workScheduler.sync(it.backgroundWorkNeeded)
+            statusWatchController.sync(it.liveDetection)
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

@@ -14,6 +14,7 @@ interface SettingsRepository {
     suspend fun setOnboardingDone()
     suspend fun setAutoSave(enabled: Boolean)
     suspend fun setNotifyNewStatuses(enabled: Boolean)
+    suspend fun setLiveDetection(enabled: Boolean)
     suspend fun setNotificationPromptShown()
     suspend fun setSortOrder(order: SortOrder)
     suspend fun setAdFreeUntil(epochMillis: Long)

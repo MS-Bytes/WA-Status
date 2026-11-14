@@ -189,6 +189,7 @@ Run on: **Android 7, 8, 9, 10, 11, 13, 14, 15, 16** – Pixel (stock) and Samsun
 - [ ] Multi-select save/share/delete, select all, back clears selection
 - [ ] Delete on Android 11+ for files from a previous install (system dialog)
 - [ ] Auto-save + notifications (Android 13+ permission flow, “Don’t ask again” → settings)
+- [ ] Instant Detection: enable it, close the app, let WhatsApp download a new status → WAVAULT notifies within seconds; survives reboot; battery-optimization prompt appears
 - [ ] Widget shows new count and opens the app
 - [ ] App Lock PIN, wrong PIN, lockout, biometrics, 30 s grace period
 - [ ] Theme light/dark/system, dynamic color (12+), rotation, tablet layout, large fonts, TalkBack labels

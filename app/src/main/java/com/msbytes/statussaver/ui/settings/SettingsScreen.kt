@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
+import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.AutoMode
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Fingerprint
@@ -116,6 +117,7 @@ fun SettingsScreen(
             notifDenied = true // "Don't ask again" → offer app settings
         }
     }
+    val batteryExempt = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri != null) {
             message(if (viewModel.grantAccess(uri)) R.string.permission_granted else R.string.permission_wrong_folder_body)
@@ -126,6 +128,14 @@ fun SettingsScreen(
         val needsPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         if (needsPermission) notifRationale = true else viewModel.setNotifications(true)
+    }
+
+    fun enableLiveDetection() {
+        viewModel.setLiveDetection(true)
+        enableNotifications()
+        if (!IntentUtils.isIgnoringBatteryOptimizations(context)) {
+            runCatching { batteryExempt.launch(IntentUtils.requestIgnoreBatteryOptimizations(context)) }
+        }
     }
 
     val biometricAvailable = remember {
@@ -174,6 +184,12 @@ fun SettingsScreen(
                 settings.notifyNewStatuses,
                 subtitle = stringResource(R.string.settings_notify_new_desc),
             ) { if (it) enableNotifications() else viewModel.setNotifications(false) }
+            SwitchItem(
+                Icons.Rounded.Bolt,
+                stringResource(R.string.settings_live_detection),
+                settings.liveDetection,
+                subtitle = stringResource(R.string.settings_live_detection_desc),
+            ) { if (it) enableLiveDetection() else viewModel.setLiveDetection(false) }
 
             Section(R.string.settings_privacy_security)
             SwitchItem(Icons.Rounded.Lock, stringResource(R.string.settings_app_lock), settings.appLockEnabled) { enable ->

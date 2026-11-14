@@ -61,6 +61,7 @@ class SettingsViewModel @Inject constructor(
     fun setDynamicColor(enabled: Boolean) = launch { settingsRepository.setDynamicColor(enabled) }
     fun setAutoSave(enabled: Boolean) = launch { settingsRepository.setAutoSave(enabled) }
     fun setNotifications(enabled: Boolean) = launch { settingsRepository.setNotifyNewStatuses(enabled) }
+    fun setLiveDetection(enabled: Boolean) = launch { settingsRepository.setLiveDetection(enabled) }
     fun setPin(pin: String?) = launch { settingsRepository.setPin(pin) }
     fun setBiometric(enabled: Boolean) = launch { settingsRepository.setBiometricEnabled(enabled) }
 

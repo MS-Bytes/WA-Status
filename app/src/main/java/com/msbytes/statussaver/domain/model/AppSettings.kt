@@ -7,6 +7,8 @@ data class AppSettings(
     val autoSave: Boolean = false,
     /** On by default so new statuses are detected in the background. */
     val notifyNewStatuses: Boolean = true,
+    /** Foreground service that detects new statuses instantly in the background. */
+    val liveDetection: Boolean = false,
     val notificationPromptShown: Boolean = false,
     val appLockEnabled: Boolean = false,
     val biometricEnabled: Boolean = false,

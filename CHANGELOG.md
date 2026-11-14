@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] – 2026-11-14
+
+### Added
+- **Instant Detection**: optional foreground service that watches the status folders
+  every few seconds while the app is closed and notifies within seconds — no need to
+  open WhatsApp. Restarts after reboot; offers to ignore battery optimization.
+
+### Note
+- Only statuses WhatsApp has downloaded to the device can be detected; the app never
+  contacts WhatsApp servers.
+
 ## [1.1.0] – 2026-11-14
 
 ### Changed

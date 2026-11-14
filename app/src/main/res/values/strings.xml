@@ -207,6 +207,8 @@
     <string name="settings_auto_save">Auto-Save New Statuses</string>
     <string name="settings_notify_new">New Status Alerts</string>
     <string name="settings_notify_new_desc">Checks Every 15 Minutes In Background</string>
+    <string name="settings_live_detection">Instant Detection</string>
+    <string name="settings_live_detection_desc">Detect New Statuses Within Seconds While The App Is Closed</string>
     <string name="settings_privacy_security">Privacy And Security</string>
     <string name="settings_app_lock">App Lock</string>
     <string name="settings_change_pin">Change PIN</string>
@@ -248,6 +250,8 @@
     <!-- ================= Notifications ================= -->
     <string name="channel_new_statuses">New Statuses</string>
     <string name="channel_auto_save">Auto-Save</string>
+    <string name="channel_watch">Background Watch</string>
+    <string name="watch_notification_title">Watching For New Statuses</string>
     <plurals name="notif_new_statuses">
         <item quantity="one">%d New Status</item>
         <item quantity="other">%d New Statuses</item>

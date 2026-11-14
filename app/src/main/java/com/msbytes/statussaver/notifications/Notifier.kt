@@ -28,6 +28,8 @@ class Notifier @Inject constructor(
             listOf(
                 NotificationChannel(CHANNEL_NEW, context.getString(R.string.channel_new_statuses), NotificationManager.IMPORTANCE_DEFAULT),
                 NotificationChannel(CHANNEL_AUTO_SAVE, context.getString(R.string.channel_auto_save), NotificationManager.IMPORTANCE_LOW),
+                NotificationChannel(CHANNEL_WATCH, context.getString(R.string.channel_watch), NotificationManager.IMPORTANCE_MIN)
+                    .apply { setShowBadge(false) },
             ),
         )
     }
@@ -50,6 +52,26 @@ class Notifier @Inject constructor(
         channel = CHANNEL_AUTO_SAVE,
         title = context.resources.getQuantityString(R.plurals.notif_auto_saved, count, count),
     )
+
+    /** Ongoing, minimal notification required by the foreground watch service. */
+    fun buildWatchNotification(): android.app.Notification =
+        NotificationCompat.Builder(context, CHANNEL_WATCH)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setColor(ContextCompat.getColor(context, R.color.notification_accent))
+            .setContentTitle(context.getString(R.string.watch_notification_title))
+            .setContentIntent(contentIntent(ID_WATCH))
+            .setOngoing(true)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .build()
+
+    private fun contentIntent(id: Int): PendingIntent {
+        val intent = Intent(context, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        return PendingIntent.getActivity(
+            context, id, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+    }
 
     private fun show(id: Int, channel: String, title: String) {
         if (!canNotify()) return
@@ -76,7 +98,9 @@ class Notifier @Inject constructor(
     private companion object {
         const val CHANNEL_NEW = "new_statuses"
         const val CHANNEL_AUTO_SAVE = "auto_save"
+        const val CHANNEL_WATCH = "watch"
         const val ID_NEW = 1001
         const val ID_AUTO_SAVE = 1002
+        const val ID_WATCH = 2001
     }
 }

@@ -44,6 +44,7 @@ class DataStoreSettingsRepository @Inject constructor(
         val AUTO_SAVE = booleanPreferencesKey("auto_save")
         val NOTIF_PROMPT = booleanPreferencesKey("notification_prompt_shown")
         val NOTIFY = booleanPreferencesKey("notify_new")
+        val LIVE = booleanPreferencesKey("live_detection")
         val BIOMETRIC = booleanPreferencesKey("biometric")
         val SORT = stringPreferencesKey("sort_order")
         val AD_FREE_UNTIL = longPreferencesKey("ad_free_until")
@@ -66,6 +67,7 @@ class DataStoreSettingsRepository @Inject constructor(
                 onboardingDone = p[Keys.ONBOARDING] ?: false,
                 autoSave = p[Keys.AUTO_SAVE] ?: false,
                 notifyNewStatuses = p[Keys.NOTIFY] ?: true,
+                liveDetection = p[Keys.LIVE] ?: false,
                 notificationPromptShown = p[Keys.NOTIF_PROMPT] ?: false,
                 appLockEnabled = s[Keys.PIN_HASH] != null,
                 biometricEnabled = p[Keys.BIOMETRIC] ?: false,
@@ -82,6 +84,7 @@ class DataStoreSettingsRepository @Inject constructor(
     override suspend fun setAutoSave(enabled: Boolean) = put(Keys.AUTO_SAVE, enabled)
     override suspend fun setNotificationPromptShown() = put(Keys.NOTIF_PROMPT, true)
     override suspend fun setNotifyNewStatuses(enabled: Boolean) = put(Keys.NOTIFY, enabled)
+    override suspend fun setLiveDetection(enabled: Boolean) = put(Keys.LIVE, enabled)
     override suspend fun setSortOrder(order: SortOrder) = put(Keys.SORT, order.name)
     override suspend fun setAdFreeUntil(epochMillis: Long) = put(Keys.AD_FREE_UNTIL, epochMillis)
     override suspend fun setBiometricEnabled(enabled: Boolean) = put(Keys.BIOMETRIC, enabled)
